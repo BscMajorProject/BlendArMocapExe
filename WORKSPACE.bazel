@@ -2,7 +2,8 @@ workspace(name = "blendarmocap")
 
 local_repository(
     name = "mediapipe",
-    path="mediapipe",
+    # path="mediapipe",
+    path="/home/denysh/Documents/development/cpp/mediapipe"
 )
 
 
