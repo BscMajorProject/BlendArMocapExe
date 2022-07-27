@@ -1,13 +1,4 @@
-# cc_library(
-#     name = "imgui_glfw",
-#     hdrs = ["imgui_glfw_core_port.h"],
-#     visibility = ["//visibility:public"],
-#     deps = [
-#         "@glfw_linux//:GLFW",
-#         # "//third_party:GLFW",
-# 
-#     ],
-# )
+# TODO: dynamic platform specific libs
 cc_binary(
     name = "demo",
     srcs = ["demo.cpp"],
@@ -28,5 +19,37 @@ cc_binary(
         "-l:libglfw.so",
     ],
 )
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+cc_library(
+    name = "rendering",
+    srcs = [
+        "rendering.cpp",
+        "interface.cpp",
+        ],
+    hdrs = [
+        "interface.h",
+    ],
+    deps = [
+        "//src/gui/imgui:imguilib",
+        "//src/gui/imgui/backends:imgui_impl_opengl3",
+        "@glfw_linux//:glfw",
+        "@gles2_linux//:gles2",
+        "//src:_app"
+    ],
+    copts = [
+        "-I/usr/include",
+    ],
+    linkopts = [
+        "-lGLEW",
+        "-lGLU",
+        "-lGL",
+        "-lglut",
+        "-l:libglfw.so",
+    ],
+    visibility = ["//visibility:public"],
+
+)
+
 
 

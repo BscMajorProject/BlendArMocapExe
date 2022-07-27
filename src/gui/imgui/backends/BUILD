@@ -15,7 +15,5 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/gui/imgui:imguilib",
-        "@glfw_linux//:glfw",
-        "@gles2_linux//:gles2"
-   ]
+    ]
 )
