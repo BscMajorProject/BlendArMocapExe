@@ -6,14 +6,55 @@ local_repository(
 )
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+new_local_repository(
+    name = "glfw_linux",
+    build_file = "@//third_party:glfw_linux.BUILD",
+    path = "/usr",
+)
+
+new_local_repository(
+    name = "gles2_linux",
+    build_file = "@//third_party:gles2_linux.BUILD",
+    path = "/usr",
+)
+
+# to be implemented
+# new_local_repository(
+#     name = "macos_glfw",
+#     build_file = "@//third_party:glfw_macos.BUILD",
+#     path = "/usr/local",
+# )
+# 
+# new_local_repository(
+#     name = "windows_glfw",
+#     build_file = "@//third_party:glfw_win.BUILD",
+#     path = "C:\\",
+# )
+
+
+
+
 
 # imgui deps
-http_archive(
-    name = "glfw",
-    build_file = "third_party/glfw.BUILD",
-    strip_prefix = "glfw-3.2.1",
-    urls = ["https://github.com/glfw/glfw/archive/3.2.1.zip"],
-)
+# load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+# 
+# new_git_repository(
+#     name = "glfw",
+#     remote = "https://github.com/glfw/glfw.git",
+#     commit = "2539d037478549a0b76bf7572dab05e1fa1a4c96",
+#     shallow_since = "1592952679 +0200",
+#     build_file = "@//third_party:glfw.BUILD",
+# )
+# http_archive(
+#     name = "glfw",
+#     build_file = "third_party/glfw.BUILD",
+#     strip_prefix = "glfw-3.2.1",
+#     urls = ["https://github.com/glfw/glfw/archive/3.2.1.zip"],
+# )
+
+##### Based on mediapipes workspace #####
+
+
 
 # https://bazelbuild.github.io/rules_foreign_cc/main/cmake.html
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive") # deps mediapipe

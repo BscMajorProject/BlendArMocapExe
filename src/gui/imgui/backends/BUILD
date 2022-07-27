@@ -13,5 +13,9 @@ cc_library(
         "imgui_impl_glfw.cpp"
         ],
     visibility = ["//visibility:public"],
-    deps = ["//src/gui/imgui:imguilib"]
+    deps = [
+        "//src/gui/imgui:imguilib",
+        "@glfw_linux//:glfw",
+        "@gles2_linux//:gles2"
+   ]
 )
