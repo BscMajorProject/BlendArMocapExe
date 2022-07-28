@@ -40,28 +40,6 @@ new_local_repository(
 
 
 
-
-# imgui deps
-# load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
-# 
-# new_git_repository(
-#     name = "glfw",
-#     remote = "https://github.com/glfw/glfw.git",
-#     commit = "2539d037478549a0b76bf7572dab05e1fa1a4c96",
-#     shallow_since = "1592952679 +0200",
-#     build_file = "@//third_party:glfw.BUILD",
-# )
-# http_archive(
-#     name = "glfw",
-#     build_file = "third_party/glfw.BUILD",
-#     strip_prefix = "glfw-3.2.1",
-#     urls = ["https://github.com/glfw/glfw/archive/3.2.1.zip"],
-# )
-
-##### Based on mediapipes workspace #####
-
-
-
 # https://bazelbuild.github.io/rules_foreign_cc/main/cmake.html
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive") # deps mediapipe
 http_archive(
@@ -77,18 +55,6 @@ rules_foreign_cc_dependencies()
 
 # This is used to select all contents of the archives for CMake-based packages to give CMake access to them.
 all_content = """filegroup(name = "all", srcs = glob(["**"]), visibility = ["//visibility:public"])"""
-
-# pcre source code repository deps imgui
-# http_archive(
-#     name = "pcre",
-#     build_file_content = all_content,
-#     strip_prefix = "pcre-8.43",
-#     urls = [
-#         "https://mirror.bazel.build/ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz",
-#         "https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz",
-#     ],
-#     sha256 = "0b8e7465dc5e98c757cc3650a20a7843ee4c3edf50aaf60bb33fd879690d2c73",
-# )
 
 ## mediapipe dependencies
 
