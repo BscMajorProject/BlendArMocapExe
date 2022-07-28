@@ -19,7 +19,7 @@ new_local_repository(
 )
 
 new_local_repository(
-    name = "opengl_linx",
+    name = "opengl_linux",
     build_file = "@//third_party:gl_linux.BUILD",
     path = "/usr",
 )

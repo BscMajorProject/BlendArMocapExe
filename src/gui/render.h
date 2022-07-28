@@ -2,7 +2,7 @@
 
 
 #include <opencv2/opencv.hpp>
-#include "utils/GL/gl3w.h"
+#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
 

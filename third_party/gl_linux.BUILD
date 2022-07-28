@@ -5,11 +5,13 @@ cc_library(
     	srcs = glob(
 		[
                 "lib/libOpenGL.so",
+				"include/GL/gl3w.c"
 		]
 	),
 	hdrs = glob(
         [
-            "include/GL/**",
+            "include/GL/*.h*",
+			"include/KHR/*.h*"
         ]),
 	includes = 
     [

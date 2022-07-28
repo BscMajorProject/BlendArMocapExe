@@ -4,7 +4,7 @@
 #include "gui/render.h"
 #include "gui/imgui/imgui.h"
 #include <GLFW/glfw3.h>
-#include "gui/utils/GL/gl3w.h"
+#include <GL/gl3w.h>
 #include "gui/imgui/backends/imgui_impl_opengl3.h"
 
 

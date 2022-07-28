@@ -23,7 +23,7 @@ cc_binary(
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
-    name = "render",
+    name = "guilib",
     srcs = [
         "render.cpp",
         "interface.cpp",
@@ -34,11 +34,11 @@ cc_library(
     ],
     deps = [
         "//src/gui/imgui:imguilib",
-        "//src/gui/utils/GL:gl3w",
         "//src/gui/imgui/backends:imgui_impl_opengl3",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",
+        "@opengl_linux//:gl"
     ],
     copts = [
         "-I/usr/include",
