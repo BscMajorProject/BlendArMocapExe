@@ -20,22 +20,25 @@ cc_binary(
     ],
 )
 
+
 load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
-    name = "rendering",
+    name = "render",
     srcs = [
-        "rendering.cpp",
+        "render.cpp",
         "interface.cpp",
         ],
     hdrs = [
-        "interface.h",
+        "render.h",
+        "interface.h"
     ],
     deps = [
         "//src/gui/imgui:imguilib",
+        "//src/gui/utils/GL:gl3w",
         "//src/gui/imgui/backends:imgui_impl_opengl3",
         "@glfw_linux//:glfw",
+        "@linux_opencv//:opencv",
         "@gles_linux//:gles",
-        "//src:_app"
     ],
     copts = [
         "-I/usr/include",
@@ -50,6 +53,4 @@ cc_library(
     visibility = ["//visibility:public"],
 
 )
-
-
 
