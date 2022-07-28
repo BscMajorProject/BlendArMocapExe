@@ -27,9 +27,12 @@ namespace BlendArMocapGUI
 
     void RenderUI(){
         const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(700, 550), ImGuiCond_FirstUseEver);
-        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+        static ImGuiWindowFlags flags = 
+            // ImGuiWindowFlags_NoDecoration | 
+            // ImGuiWindowFlags_NoMove | 
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize;
 
         // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
         // Based on your use case you may want one of the other.
@@ -38,7 +41,7 @@ namespace BlendArMocapGUI
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
 
-        ImGui::Begin("BlendArMocap", pOpen);
+        ImGui::Begin("InvisibleHeader", pOpen, flags);
 
         if (ImGui::CollapsingHeader("Monitor", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -103,6 +106,14 @@ namespace BlendArMocapGUI
     }
 
     void CreateRawTexture(){
+        float raw_texture[40000] = {};
+
+        for (int i = 0; i < 10000; i+4){
+            raw_texture[i] = 1.0f;
+            raw_texture[i+1] = 0.0f;
+            raw_texture[i+2] = 1.0f;
+            raw_texture[i+3] = 1.0f;
+        }
 
     }
 } 

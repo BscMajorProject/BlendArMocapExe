@@ -11,6 +11,7 @@ exports_files(["LICENSE"])
 # '                libopencv-imgproc-dev libopencv-video-dev'
 # on Debian Buster/Ubuntu 18.04.
 # If you install OpenCV separately, please modify the build rule accordingly.
+# https://github.com/google/mediapipe/issues/496
 cc_library(
 	name = "opencv",
     	# TESTRUN

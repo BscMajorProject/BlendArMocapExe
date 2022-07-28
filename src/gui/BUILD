@@ -6,7 +6,7 @@ cc_binary(
         "//src/gui/imgui:imguilib",
         "//src/gui/imgui/backends:imgui_impl_opengl3",
         "@glfw_linux//:glfw",
-        "@gles2_linux//:gles2",
+        "@gles_linux//:gles",
     ],
     copts = [
         "-I/usr/include",
@@ -34,7 +34,7 @@ cc_library(
         "//src/gui/imgui:imguilib",
         "//src/gui/imgui/backends:imgui_impl_opengl3",
         "@glfw_linux//:glfw",
-        "@gles2_linux//:gles2",
+        "@gles_linux//:gles",
         "//src:_app"
     ],
     copts = [

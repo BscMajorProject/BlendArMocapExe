@@ -1,0 +1,14 @@
+cc_binary(
+    name="opencv_tex",
+    srcs=["opencv_tex.cpp"],
+    deps=[
+        "//src/gui/imgui:imguilib",
+        "//src/gui/utils/GL:gl3w",
+        "//src/gui/imgui/backends:imgui_impl_opengl3",
+        "@linux_opencv//:opencv",
+        "@glfw_linux//:glfw",
+        "@gles_linux//:gles",    
+        "@opengl_linx//:gl",
+        ],
+    data=["lena.jpg"],
+)
