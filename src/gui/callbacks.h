@@ -3,13 +3,12 @@
 
 namespace BlendArMocapGUI
 {
-    void OnConfigDetectionType();
-    void OnToggleDetection();
-
-    void OnConfigInputType();
-    void OnConfigWebcamDeviceSlot();
-    void OnConfigMoviePath();
-
-    void OnConfigPort();
-    void OnConfigPassword();
+    void OnConfigDetectionType(int *value);
+    void OnToggleDetection(bool value);
+    void OnConfigInputType(int *value);
+    void OnConfigWebcamDeviceSlot(int *value);
+    void OnConfigMoviePath(char *value);
+    bool IsDetecting();
+    void StartDetection();
+    void StopDetection();
 }

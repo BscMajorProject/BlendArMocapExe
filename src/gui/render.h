@@ -12,5 +12,5 @@ namespace BlendArMocapGUI{
     GLuint OnBeforeRender(cv::Mat image);
     void DrawGUI(GLuint texture, cv::Mat image);
     void OnExitGUI();
-    void Render(GLFWwindow* window);
+    void Render(cv::Mat frame, GLFWwindow* window);
 }

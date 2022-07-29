@@ -3,9 +3,9 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-#include "../imgui/imgui.h"
-#include "../imgui/backends/imgui_impl_glfw.h"
-#include "../imgui/backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
@@ -164,9 +164,22 @@ int main(int argc, char* argv[]){
         if (frame.empty()){
             break;
         }
+        //changing img props
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGBA);
+        cv::Mat tmp;
+        cv::flip(frame, tmp, 1);
+
+        //getting viewport
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        int width = viewport->WorkSize.x;
+        int height = (width/16)*9;
         cv::Mat dst;
-        cv::flip(frame, dst, 1);
+        if (width > 480){
+            cv::resize(tmp, dst, cv::Size(width, height));
+        }
+        else{
+            dst = tmp;
+        }
         GLuint texture = OnBeforeRender(dst);
         DrawGUI(texture, dst);
 

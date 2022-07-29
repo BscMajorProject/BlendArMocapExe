@@ -1,22 +1,14 @@
 # TODO: dynamic platform specific libs
 cc_binary(
     name = "demo",
-    srcs = ["demo.cpp"],
+    srcs = ["imgui_demo.cpp"],
     deps = [
-        "//src/gui/imgui:imguilib",
-        "//src/gui/imgui/backends:imgui_impl_opengl3",
+        "@dearimgui//:imgui_glfw",
         "@glfw_linux//:glfw",
         "@gles_linux//:gles",
     ],
     copts = [
         "-I/usr/include",
-    ],
-    linkopts = [
-        "-lGLEW",
-        "-lGLU",
-        "-lGL",
-        "-lglut",
-        "-l:libglfw.so",
     ],
 )
 
@@ -27,14 +19,15 @@ cc_library(
     srcs = [
         "render.cpp",
         "interface.cpp",
+        "callbacks.cpp",
         ],
     hdrs = [
         "render.h",
-        "interface.h"
+        "interface.h",
+        "callbacks.h",
     ],
     deps = [
-        "//src/gui/imgui:imguilib",
-        "//src/gui/imgui/backends:imgui_impl_opengl3",
+        "@dearimgui//:imgui_glfw",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",

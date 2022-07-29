@@ -1,5 +1,8 @@
+#include <iostream>
+
+#include "imgui.h"
 #include "interface.h"
-#include "imgui/imgui.h"
+#include "callbacks.h"
 
 
 // Helper to wire demo markers located in code to a interactive browser
@@ -28,19 +31,16 @@ namespace BlendArMocapGUI
     }
 
     void DrawInterface(){
-        if (ImGui::CollapsingHeader("Monitor", ImGuiTreeNodeFlags_DefaultOpen))
-        {
+        if (ImGui::CollapsingHeader("Monitor", ImGuiTreeNodeFlags_DefaultOpen)){
             DetectionPanel();
         }        
          
-        if (ImGui::CollapsingHeader("Input Configuration"))
-        {
+        if (ImGui::CollapsingHeader("Input Configuration", ImGuiTreeNodeFlags_DefaultOpen)){
             InputConfigPanel();
         }        
-        if (ImGui::CollapsingHeader("Ouput Configuration"))
-        {
-            OutputConfigPanel();
-        }
+        // if (ImGui::CollapsingHeader("Ouput Configuration")){
+        //     OutputConfigPanel();
+        // }
     }
 
     void DetectionPanel(){
@@ -52,13 +52,22 @@ namespace BlendArMocapGUI
             ImGui::RadioButton("Face", &e, 1); ImGui::SameLine();
             ImGui::RadioButton("Pose", &e, 2); ImGui::SameLine();
             ImGui::RadioButton("Holistic", &e, 3); ImGui::SameLine();
+            OnConfigDetectionType(&e);
             ImGui::EndChild();
         }
         ImGui::SameLine();
         {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
             ImGui::BeginChild("ChildR", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 20), false, 0);
-            ImGui::Button("Start Detection");
+            if (IsDetecting()){
+                OnToggleDetection(ImGui::Button("Start Detection"));
+            }
+            else {
+                OnToggleDetection(ImGui::Button("Stop Detection"));
+            }
+
+
+
 
             ImGui::EndChild();
         }
@@ -71,10 +80,16 @@ namespace BlendArMocapGUI
         static int e = 0;
         ImGui::RadioButton("Webcam", &e, 0); ImGui::SameLine();
         ImGui::RadioButton("Movie File", &e, 1);
-        static char str1[128] = "";
+        OnConfigInputType(&e);
+
         static int i0 = 0;
         ImGui::InputInt("Webcam Device Slot", &i0);
+        OnConfigWebcamDeviceSlot(&i0);
+
+        static char str1[128] = "";
         ImGui::InputTextWithHint("Movie Path", "Paste Path to Movie", str1, IM_ARRAYSIZE(str1));
+        OnConfigMoviePath(str1);
+
         ImGui::Spacing();
     }
 

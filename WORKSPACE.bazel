@@ -5,6 +5,11 @@ local_repository(
     path="/home/denysh/Documents/development/cpp/mediapipe"
 )
 
+local_repository(
+    name = "dearimgui",
+    path = "third_party/imgui/",
+)
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 new_local_repository(
     name = "glfw_linux",

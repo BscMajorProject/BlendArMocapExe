@@ -1,8 +1,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 #include <GL/gl3w.h>
 #include "interface.h"
 #include <GLFW/glfw3.h>
@@ -34,6 +34,8 @@ namespace BlendArMocapGUI
 
 
     GLFWwindow* IntializeWindow(int width, int height, char *label){
+        glfwSetErrorCallback(glfw_error_callback);
+
         // Decide GL+GLSL versions
     #if defined(IMGUI_IMPL_OPENGL_ES2)
         // GL ES 2.0 + GLSL 100
@@ -93,7 +95,8 @@ namespace BlendArMocapGUI
         //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
         //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
         //IM_ASSERT(font != NULL);
-
+        
+        //ImFont* font = io.Fonts->AddFontFromFileTTF();
         return window;
     }
     
@@ -125,12 +128,6 @@ namespace BlendArMocapGUI
         return texture;
     }
 
-    void Render(GLFWwindow* window){
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
-    }
-
     void OnExitGUI(){
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
@@ -158,4 +155,26 @@ namespace BlendArMocapGUI
         ImGui::End();
     }
 
+    cv::Mat ResizeImage(cv::Mat image){
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        int width = viewport->WorkSize.x;
+        int height = (width/16)*9;
+        cv::Mat dst;
+        if (width > 50){
+            cv::resize(image, dst, cv::Size(width, height));
+        }
+        else{
+            dst = image;
+        }
+        return dst;
+    }
+
+    void Render(cv::Mat frame, GLFWwindow* window){
+        cv::Mat image = ResizeImage(frame);
+        GLuint texture = BlendArMocapGUI::OnBeforeRender(image);
+        BlendArMocapGUI::DrawGUI(texture, image);
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(window);
+    }
 }

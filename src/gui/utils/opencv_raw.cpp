@@ -3,9 +3,9 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-#include "../imgui/imgui.h"
-#include "../imgui/backends/imgui_impl_glfw.h"
-#include "../imgui/backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
@@ -150,8 +150,23 @@ int main( int argc, char* argv[] )
 
     // preform the render loop
     while(!glfwWindowShouldClose(window)){
-        GLuint texture = OnBeforeRender(image);
-        DrawGUI(texture, image);
+
+        //getting viewport
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        int width = viewport->WorkSize.x;
+        int height = (width/16)*9;
+        cv::Mat dst;
+        if (width > 480){
+            cv::resize(image, dst, cv::Size(width, height));
+        }
+        else{
+            dst = image;
+        }
+        // cv::Size size (int(viewport->Size.x), int(viewport->Size.y)));
+        // cv::resize(frame, dst, size);
+
+        GLuint texture = OnBeforeRender(dst);
+        DrawGUI(texture, dst);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
