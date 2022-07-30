@@ -18,7 +18,7 @@ package(default_visibility = ["@mediapipe//mediapipe/examples:__subpackages__"])
 
 
 cc_binary(
-    name = "cpu_tracking_main",
+    name = "_cpu_tracking_main",
     deps = [
         "//src/mp/detection:run_demo_graph",
         "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
@@ -28,4 +28,21 @@ cc_binary(
         "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
     ],
 )
+
+
+cc_binary(
+    name = "cpu_tracking_main",
+    srcs = [
+        "//src/mp/detection:run_graph",
+    ],
+    deps = [
+        "//src/mp/detection:demo_lib"
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+        "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
+        "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
+        "@mediapipe//mediapipe/graphs/iris_tracking:iris_tracking_cpu_video_input_deps",
+        "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
+    ],
+)
+
 
