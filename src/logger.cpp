@@ -1,17 +1,34 @@
 #include <iostream>
 
+enum Serverity { DEBUG, INFO, WARN, ERR };
 
-#define debug(msg) std::cout << msg << std::endl
-#define log(msg) std::clog << msg << std::endl
-#define err(msg) std::cerr << "\033[1;31m" << msg << "\033[0m\n"
-#define warn(msg) std::cerr << "\033[1;33m" << msg << "\033[0m\n"
+#define log(_serverity, msg) LogConfig(_serverity, msg)
 
-#define changed(src, other) ((src == other) ? false : true )
-#define min(a, b) ((a < b) ? (a : b))
-#define max(a, b) ((a > b) ? (a : b))
+void LogConfig(Serverity serverity, std::string msg){
+    switch (serverity){
+        case DEBUG:
+        std::cout << msg << std::endl;
+        break;
+        case INFO:
+        std::cout << msg << std::endl;
+        break;
+        case WARN:
+        std::cerr << "\033[1;31m" << msg << "\033[0m\n";
+        break;
+        case ERR:
+        std::cerr << "\033[1;33m" << msg << "\033[0m\n";
+        break;
+        default:
+        std::cout << msg << std::endl;
+        break;
+    }
+}
+
+
 int main(){
-    log("some message");
-    err("some error");
-    debug("some debug");
-    warn("some warn");
+    log(DEBUG, "some debug");
+    log(WARN, "some warn");
+    log(ERR, "some error");
+    log(INFO, "some info");
+
 }

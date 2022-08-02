@@ -24,106 +24,118 @@ ABSL_FLAG(std::string, output_video_path, "",
           "Full path of where to save result (.mp4 only). "
           "If not provided, show result in a window.");
 
+constexpr char kInputStream[] = "input_video";
+constexpr char kOutputStream[] = "output_video";
+constexpr char kDetectionsStream[] = "multi_face_landmarks"; // STREAM FOR OUTPUT RESULTS && NAME GOT TO MATCH
+
+
 namespace BlendArMocap
 {
-    constexpr char kInputStream[] = "input_video";
-    constexpr char kOutputStream[] = "output_video";
-    constexpr char kDetectionsStream[] = "multi_face_landmarks"; // STREAM FOR OUTPUT RESULTS && NAME GOT TO MATCH
+    GraphHandler::GraphHandler(){
+        std::cout << "graph created" << std::endl;
+    }
 
+    absl::Status GraphHandler::Start(std::string graph_config_path){
+        InitializeGraph(graph_config_path);
+        std::cout << "started graph" << std::endl;
+        CreateUniquePoller();
+        std::cout << "assined pollers" << std::endl;
+        MP_RETURN_IF_ERROR(this->graph.StartRun({}));
+        std::cout << "grah running" << std::endl;
 
-    absl::Status Graph::Start(std::string config_string){
-        InitializeGraph(config_string);
-        AssignPoller();
-        MP_RETURN_IF_ERROR(graph.StartRun({}));
         this->isActive = true;
         return absl::OkStatus();
     }
 
-    absl::Status Graph::ProcessFrame(cv::Mat inputFrame){
-        this->isProcessing = true;
-        MP_RETURN_IF_ERROR(PushFrameToGraph(inputFrame));
-        MP_RETURN_IF_ERROR(GetGraphResults());
-        this->isProcessing = false;
-        return absl::OkStatus();
+    absl::Status GraphHandler::ProcessFrame(cv::Mat inputFrame){
+        if (!inputFrame.empty()){
+            MP_RETURN_IF_ERROR(PushFrameToGraph(inputFrame));
+            MP_RETURN_IF_ERROR(GetGraphResults());
+            return absl::OkStatus();
+        }
     }
 
-    absl::Status Graph::Stop(){
+    absl::Status GraphHandler::Stop(){
         this->isActive = false;
         LOG(INFO) << "Shutting down.";
-        MP_RETURN_IF_ERROR(graph.CloseInputStream(kInputStream));
-        return graph.WaitUntilDone();
+
+        MP_RETURN_IF_ERROR(this->graph.CloseInputStream(kInputStream));
+        return this->graph.WaitUntilDone();
     }
 
 
     // Create a calulator graph using a protobuf string.
-    absl::Status Graph::InitializeGraph(std::string calculator_graph_config_contents){
+    absl::Status GraphHandler::InitializeGraph(std::string path){
         // init string for graph contents
+        std::string calculator_graph_config_contents;
         // getting graph contents by flag
-        MP_RETURN_IF_ERROR(mediapipe::file::GetContents(
-            absl::GetFlag(FLAGS_calculator_graph_config_file),
-            &calculator_graph_config_contents));
-
+        MP_RETURN_IF_ERROR(mediapipe::file::GetContents(path, &calculator_graph_config_contents));
+        // logging graph contents
         LOG(INFO) << "Get calculator graph config contents: " << calculator_graph_config_contents;
-        // parses the proto config to an calculator graph config
         mediapipe::CalculatorGraphConfig config =
             mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(
                 calculator_graph_config_contents);
 
-
-        // initializing the graph
         LOG(INFO) << "Initialize the calculator graph.";
-        MP_RETURN_IF_ERROR(this->graph.Initialize(config));
+        MP_RETURN_IF_ERROR(graph.Initialize(config));
+        std::cout << "INIT GRAPH" << std::endl;
         return absl::OkStatus();
     }
     
-    // Use pollers to grab data from the graph.
-    absl::Status Graph::AssignPoller(){
-        // std::cout << "Start running the calculator graph." << std::endl;
-        LOG(INFO) << "Adding pollers to stream.";
-        ASSIGN_OR_RETURN(this->streamPoller, graph.AddOutputStreamPoller(kOutputStream));
-        // POLLER FOR DETECTION RESULTSE20220730 22:21:01.779698 27172 run_graph.cpp:177] Failed to run the graph: ; Unable to attach observer to output stream "output_detections" because it doesn't exist.
-        ASSIGN_OR_RETURN(this->detectionPoller, graph.AddOutputStreamPoller(kDetectionsStream));
+    bool GraphHandler::CreateUniquePoller(){
         
-        //TODO: RENAME; MOVE WHATEVER
-        return absl::OkStatus();
+        std::cout << "create stream poller" << std::endl;
+        mediapipe::StatusOrPoller sop2 = this->graph.AddOutputStreamPoller(kOutputStream);
+        assert(sop2.ok());
+        this->streamPoller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(sop2.value()));
+        
+        std::cout << "create detection poller" << std::endl;
+        mediapipe::StatusOrPoller sop1 = this->graph.AddOutputStreamPoller(kDetectionsStream);
+        assert(sop1.ok());
+        this->detectionPoller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(sop1.value()));
+        return true;
     }
     
-    absl::Status Graph::PushFrameToGraph(cv::Mat frame){
+    absl::Status GraphHandler::PushFrameToGraph(cv::Mat frame){
+        std::cout << "creating mp frame" << std::endl;
         // Wrap Mat into an ImageFrame.
         auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
             mediapipe::ImageFormat::SRGB, frame.cols, frame.rows,
             mediapipe::ImageFrame::kDefaultAlignmentBoundary);
+        std::cout << "created iframe" << std::endl;
         cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
         frame.copyTo(input_frame_mat);
 
+        std::cout<< "create time" << std::endl;
         // Send image packet into the graph.
-        size_t frame_timestamp_us =
-            (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
+        size_t frame_timestamp_us = (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
+        std::cout << "frame to graph" << std::endl;
         MP_RETURN_IF_ERROR(this->graph.AddPacketToInputStream(
             kInputStream, mediapipe::Adopt(input_frame.release())
                               .At(mediapipe::Timestamp(frame_timestamp_us))));
-        
+        std::cout << "frame done" << std::endl;
         return absl::OkStatus();
     }
 
-    absl::Status Graph::GetGraphResults(){
-
-        mediapipe::Packet frame_packet;
-        if (!this->streamPoller.Next(&frame_packet)){
+    absl::Status GraphHandler::GetGraphResults(){
+        std::cout << "try gettomg results" << std::endl;
+        mediapipe::Packet frame_packet; // new packet for detection results
+        if (!this->streamPoller->Next(&frame_packet)){
             return absl::UnknownError("Frame packet poller failed");
         }
-
+        
         mediapipe::Packet detection_packet; // new packet for detection results
-        if (!this->streamPoller.Next(&detection_packet)){
+        if (!this->detectionPoller->Next(&detection_packet)){
             return absl::UnknownError("Detection packet poller failed");
         }
-
+        
         auto& output_frame = frame_packet.Get<mediapipe::ImageFrame>();
         // Convert format back to opencv::Mat
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
         auto& output_landmarks = detection_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
         // TODO CONVERT STREAM DETECTION RESULTS
         this->frame = output_frame_mat;
+        std::cout << "frame done" << std::endl;
         return absl::OkStatus();
     }
 }

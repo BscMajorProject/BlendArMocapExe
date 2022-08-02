@@ -20,8 +20,6 @@ cc_binary(
         "//src:session_manager",
     ],
     visibility = ["//visibility:public"],
-
-    # data=["//src/mp/graph:face_mesh_desktop_live.pbtxt"]
 )
 
 
@@ -33,6 +31,4 @@ cc_library(
         "//src:session_manager",
     ],
     visibility = ["//visibility:public"],
-
-    # data=["//src/mp/graph:face_mesh_desktop_live.pbtxt"]
 )

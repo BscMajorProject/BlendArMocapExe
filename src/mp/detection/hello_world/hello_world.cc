@@ -23,6 +23,8 @@
 using namespace mediapipe; 
 
 
+
+mediapipe::OutputStreamPoller *poller;
 absl::Status PrintHelloWorld() {
   // Configures a simple graph, which concatenates 2 PassThroughCalculators.
   mediapipe::CalculatorGraphConfig config =
@@ -43,8 +45,14 @@ absl::Status PrintHelloWorld() {
 
   mediapipe::CalculatorGraph graph;
   MP_RETURN_IF_ERROR(graph.Initialize(config));
-  ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller("out"));
+
+  mediapipe::StatusOrPoller sop = graph.AddOutputStreamPoller("out");
+  assert(sop.ok());
+  poller = &sop.value();
+
+  // ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
+  //                  graph.AddOutputStreamPoller("out"));
+
   MP_RETURN_IF_ERROR(graph.StartRun({}));
   // Give 10 input packets that contains the same string "Hello World!".
   for (int i = 0; i < 10; ++i) {
@@ -54,8 +62,8 @@ absl::Status PrintHelloWorld() {
   // Close the input stream "in".
   MP_RETURN_IF_ERROR(graph.CloseInputStream("in"));
   mediapipe::Packet packet;
-  // Get the output packets string.
-  while (poller.Next(&packet)) {
+  //Get the output packets string.
+  while (poller->Next(&packet)) {
     LOG(INFO) << packet.Get<std::string>();
   }
   return graph.WaitUntilDone();

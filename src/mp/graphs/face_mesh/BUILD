@@ -45,9 +45,10 @@ cc_library(
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
         "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
 
-        "//src/mp/graphs/face_mesh/subgraphs:face_renderer_cpu",
+        # "//src/mp/graphs/face_mesh/subgraphs:face_renderer_cpu",
         # "//src/mp/modules/face_landmark:face_landmark_front_cpu",
+        
         "@mediapipe//mediapipe/modules/face_landmark:face_landmark_front_cpu",
-        # "@mediapipe//mediapipe/graphs/face_mesh/subgraphs:face_renderer_cpu",
+        "@mediapipe//mediapipe/graphs/face_mesh/subgraphs:face_renderer_cpu",
     ],
 )

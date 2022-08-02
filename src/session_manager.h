@@ -3,6 +3,7 @@
 
 //#include "mp/graph_handler.h"
 #include "mp/cv_stream.h"
+#include "mp/graph_handler.h"
 
 namespace BlendArMocap{
     class SessionManager{
@@ -18,7 +19,9 @@ namespace BlendArMocap{
 
 
     private:
+        cv::Mat arFrame;
         CVStream stream;
+        GraphHandler graph;
     };
 }
 

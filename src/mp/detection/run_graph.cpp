@@ -45,7 +45,9 @@ ABSL_FLAG(std::string, output_video_path, "",
           "If not provided, show result in a window.");
 
 
-absl::Status RunMPPGraph(std::string path) {
+mediapipe::CalculatorGraph graph;
+absl::Status Init(std::string path){
+
     // init string for graph contents
     std::string calculator_graph_config_contents;
     // getting graph contents by flag
@@ -66,17 +68,17 @@ absl::Status RunMPPGraph(std::string path) {
 
     LOG(INFO) << "Initialize the calculator graph.";
     // std::cout << "Initialize the calculator graph." << std::endl;
-    mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
     std::cout << "INIT GRAPH" << std::endl;
+    return absl::OkStatus();
+}
 
-    //////////////////////////////////////////////// PASSED ///////////////////////////////////////////////////
-    //////////////////////////////////////////////// PASSED ///////////////////////////////////////////////////
-    // initializing the graph
-    // init camera or video
+
+cv::VideoCapture capture;
+bool load_video;
+absl::Status InitOpenCV(){
     LOG(INFO) << "Initialize the camera or load the video.";
-    cv::VideoCapture capture;
-    const bool load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
+    load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
     if (load_video) {
         capture.open(absl::GetFlag(FLAGS_input_video_path));
     } else {
@@ -92,21 +94,59 @@ absl::Status RunMPPGraph(std::string path) {
     capture.set(cv::CAP_PROP_FPS, 30);
     #endif
     
-    // start running graph
+}
+/*
+mediapipe::OutputStreamPoller *poller;
+mediapipe::OutputStreamPoller *poller_detection;
+absl::Status AssignPollers(){
     std::cout << "TRY ATTACH POLLERS" << std::endl;
 
     // std::cout << "Start running the calculator graph." << std::endl;
     LOG(INFO) << "Start running the calculator graph.";
-    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
-                   graph.AddOutputStreamPoller(kOutputStream));
+    // ASSIGN_OR_RETURN(poller, graph.AddOutputStreamPoller(kOutputStream));
+    // mediapipe::StatusOrPoller sop = graph.AddOutputStreamPoller("output_stream");
+    // assert(sop.ok());
 
-    // POLLER FOR DETECTION RESULTSE20220730 22:21:01.779698 27172 run_graph.cpp:177] Failed to run the graph: ; Unable to attach observer to output stream "output_detections" because it doesn't exist.
+    mediapipe::StatusOrPoller sop = graph.AddOutputStreamPoller(kOutputStream);
+    assert(sop.ok());
+    poller = &sop.value();
 
 
-    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller_detection, 
-        graph.AddOutputStreamPoller(kDetectionsStream));
+    mediapipe::StatusOrPoller sop2 = graph.AddOutputStreamPoller(kDetectionsStream);
+    assert(sop.ok());
+    poller_detection = &sop.value();
 
-    
+    // poller = std::make_unique<mediapipe::OutputStreamPoller>(sop.value());
+    // ASSIGN_OR_RETURN(poller_detection, graph.AddOutputStreamPoller(kDetectionsStream));
+    // mediapipe::StatusOrPoller sop2 = graph.AddOutputStreamPoller("multi_face_landmarks");
+    // assert(sop2.ok());
+    // poller_detection = std::make_unique<mediapipe::OutputStreamPoller>(sop2.value());
+    return absl::OkStatus();
+}
+*/
+
+std::unique_ptr<mediapipe::OutputStreamPoller> poller;
+bool CreateUniquePoller(){
+    mediapipe::StatusOrPoller sop2 = graph.AddOutputStreamPoller(kOutputStream);
+    assert(sop2.ok());
+    poller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(sop2.value()));
+    return true;
+}
+
+// mediapipe::OutputStreamPoller* CreatePoller(){
+//     mediapipe::StatusOrPoller sop = graph.AddOutputStreamPoller(kOutputStream);
+//     assert(sop.ok());
+//     //mediapipe::OutputStreamPoller *poller = &sop.value();
+//     //return &poller;
+// }
+
+absl::Status RunMPPGraph(std::string path) {
+    Init(path);
+    InitOpenCV();
+    if (!CreateUniquePoller()){
+        return absl::UnimplementedError("EXCEPTED EXCEPTION :)");
+    };
+    std::cout << "hello world"<< std::endl;
     std::cout << "START RUNNING THE GRAPH" << std::endl;
     MP_RETURN_IF_ERROR(graph.StartRun({}));
 
@@ -133,6 +173,8 @@ absl::Status RunMPPGraph(std::string path) {
             cv::flip(camera_frame, camera_frame, /*flipcode=HORIZONTAL*/ 1);
         }
 
+
+        std::cout << "make unique mp frame" << std::endl;
         // Wrap Mat into an ImageFrame.
         auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
             mediapipe::ImageFormat::SRGB, camera_frame.cols, camera_frame.rows,
@@ -146,19 +188,30 @@ absl::Status RunMPPGraph(std::string path) {
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
             kInputStream, mediapipe::Adopt(input_frame.release())
                               .At(mediapipe::Timestamp(frame_timestamp_us))));
+        std::cout << "create packages" << std::endl;
 
+         // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+       // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+        // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+
+        // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
         // Get the graph result packet, or stop if that fails.
+
         mediapipe::Packet packet;
-        if (!poller.Next(&packet)) {
-            break;
-        }
+        if (!poller->Next(&packet)) { break; }
+        
+        // mediapipe::Packet detection_packet; // new packet for detection results
+        // if (poller_detection.Next(&detection_packet)){}
+        // else {break;}
+        // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+                   // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+       // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+       // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+       // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
 
-        mediapipe::Packet detection_packet; // new packet for detection results
-        if (!poller_detection.Next(&detection_packet)) break;
-
-
+        std::cout << "create mp image frame" << std::endl;
         auto& output_frame = packet.Get<mediapipe::ImageFrame>();
-        auto& output_landmarks = detection_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>(); // and theres my data? :ooo
+        // auto& output_landmarks = detection_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>(); // and theres my data? :ooo
         // do something.. print??
         // std::cout << "new res" << output_landmarks.size() << std::endl;
         // for (int i = 0; i < output_landmarks.size(); i++)
@@ -168,7 +221,7 @@ absl::Status RunMPPGraph(std::string path) {
         //     std::cout << i << std::endl;
         // 
         // }
-        // std::cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
+        // std::cout << "//////////V/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
 
         // Convert back to opencv for display or saving.
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);

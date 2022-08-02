@@ -21,6 +21,14 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(
+     srcs = [
+        "face_detection_full_range.tflite",
+        "face_detection_full_range_sparse.tflite",
+        "face_detection_short_range.tflite",
+    ],
+)
+
 mediapipe_simple_subgraph(
     name = "face_detection_short_range_by_roi_cpu",
     graph = "face_detection_short_range_by_roi_cpu.pbtxt",
@@ -164,10 +172,3 @@ mediapipe_simple_subgraph(
     ],
 )
 
-exports_files(
-    srcs = [
-        "face_detection_full_range.tflite",
-        "face_detection_full_range_sparse.tflite",
-        "face_detection_short_range.tflite",
-    ],
-)

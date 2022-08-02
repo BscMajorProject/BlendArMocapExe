@@ -21,14 +21,7 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "tensors_to_face_landmarks_with_attention.pbtxt",
-    "face_landmark_cpu.pbtxt",
-    "face_landmark_front_cpu.pbtxt",
-    "face_landmark_landmarks_to_roi.pbtxt",
-    "face_landmark_model_loader.pbtxt",
-    "face_landmark_with_attention.tflite",
-    "face_landmark.tflite"])
+exports_files(glob(["*.tflite"]))
 
 
 mediapipe_simple_subgraph(
@@ -91,8 +84,8 @@ mediapipe_simple_subgraph(
         "@mediapipe//mediapipe/calculators/util:association_norm_rect_calculator",
         "@mediapipe//mediapipe/calculators/util:collection_has_min_size_calculator",
         
-        # "@mediapipe//mediapipe/modules/face_detection:face_detection_short_range_cpu",
-        "//src/mp/modules/face_detection:face_detection_short_range_cpu",
+        "@mediapipe//mediapipe/modules/face_detection:face_detection_short_range_cpu",
+        # "//src/mp/modules/face_detection:face_detection_short_range_cpu",
     ],
 )
 
@@ -141,12 +134,7 @@ mediapipe_simple_subgraph(
     ],
 )
 
-exports_files(
-    srcs = [
-        "face_landmark.tflite",
-        "face_landmark_with_attention.tflite",
-    ],
-)
+
 
 mediapipe_simple_subgraph(
     name = "face_detection_front_detection_to_roi",

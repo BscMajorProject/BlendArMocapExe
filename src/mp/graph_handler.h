@@ -20,8 +20,9 @@
 
 namespace BlendArMocap
 {
-    class Graph{
+    class GraphHandler{
     public:
+        GraphHandler();
         enum DetectionType { FACE, POSE, HANDS, HOLISTIC };
         DetectionType detection_type;
 
@@ -32,17 +33,14 @@ namespace BlendArMocap
         absl::Status Start(std::string config_string);
         absl::Status ProcessFrame(cv::Mat inputFrame);
         absl::Status Stop();
-        
 
     private:
         bool isProcessing = false;
-
-        mediapipe::OutputStreamPoller streamPoller;
-        mediapipe::OutputStreamPoller detectionPoller;
-
         mediapipe::CalculatorGraph graph;
-        std::vector<mediapipe::OutputStreamPoller> _pollers;
         
+        std::unique_ptr<mediapipe::OutputStreamPoller> streamPoller;
+        std::unique_ptr<mediapipe::OutputStreamPoller> detectionPoller;
+
         // Create a calulator graph using a protobuf string.
         absl::Status InitializeGraph(std::string calculator_graph_config_contents);
 
@@ -50,6 +48,7 @@ namespace BlendArMocap
         absl::Status AssignPoller();
         absl::Status PushFrameToGraph(cv::Mat frame);
         absl::Status GetGraphResults();
+        bool CreateUniquePoller();
     };
 }
 
