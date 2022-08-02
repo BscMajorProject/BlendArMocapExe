@@ -158,7 +158,7 @@ namespace BlendArMocapGUI
     cv::Mat ResizeImage(cv::Mat image){
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         int width = viewport->WorkSize.x;
-        int height = (width/16)*9;
+        int height = (width/4)*3;
         cv::Mat dst;
         if (width > 50){
             cv::resize(image, dst, cv::Size(width, height));
@@ -171,6 +171,7 @@ namespace BlendArMocapGUI
 
     void Render(cv::Mat frame, GLFWwindow* window){
         cv::Mat image = ResizeImage(frame);
+        // cv::Mat image = frame;
         GLuint texture = BlendArMocapGUI::OnBeforeRender(image);
         BlendArMocapGUI::DrawGUI(texture, image);
         ImGui::Render();

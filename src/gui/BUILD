@@ -22,11 +22,12 @@ cc_library(
         "callbacks.cpp",
         ],
     hdrs = [
+        "callbacks.h",
         "render.h",
         "interface.h",
-        "callbacks.h",
     ],
     deps = [
+        "//src:session_manager",
         "@dearimgui//:imgui_glfw",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",

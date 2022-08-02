@@ -22,34 +22,34 @@ namespace BlendArMocap
 {
     class Graph{
     public:
-        enum detection_type { FACE, POSE, HANDS, HOLISTIC };
-        enum input_type { WEBCAM, MOVIE };
-        std::string movie_path;
+        enum DetectionType { FACE, POSE, HANDS, HOLISTIC };
+        DetectionType detection_type;
 
-        bool isRunning;
+        bool isActive = false;
+        cv::Mat frame;
+        std::string detectionResults;
 
-        void Start();
-        void Process();
-        void Stop();
+        absl::Status Start(std::string config_string);
+        absl::Status ProcessFrame(cv::Mat inputFrame);
+        absl::Status Stop();
+        
 
     private:
-        mediapipe::CalculatorGraph _graph;
+        bool isProcessing = false;
+
+        mediapipe::OutputStreamPoller streamPoller;
+        mediapipe::OutputStreamPoller detectionPoller;
+
+        mediapipe::CalculatorGraph graph;
         std::vector<mediapipe::OutputStreamPoller> _pollers;
-
-        // Create a calulator graph using a protobuf string
-        mediapipe::CalculatorGraph InitializeGraph(std::string calculator_graph_config_contents);
-        void CloseGraph();
-
-        // Use pollers to grab data from the Graph.
-        mediapipe::OutputStreamPoller AssignPoller();
-        mediapipe::Packet GetPackage(mediapipe::OutputStreamPoller poller);
-        mediapipe::ImageFrame PullFrame(mediapipe::Packet packet);
-        std::vector<mediapipe::NormalizedLandmarkList> PullLandmarks(mediapipe::Packet packet);
         
-        // Display results in Stream.
-        cv::VideoCapture InitializeCapture();
-        void DrawCapture(cv::Mat);
-        void CloseCapture();
+        // Create a calulator graph using a protobuf string.
+        absl::Status InitializeGraph(std::string calculator_graph_config_contents);
+
+        // Use pollers to grab data from the graph.
+        absl::Status AssignPoller();
+        absl::Status PushFrameToGraph(cv::Mat frame);
+        absl::Status GetGraphResults();
     };
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../session_manager.h"
+
 
 namespace BlendArMocapGUI
 {
@@ -9,6 +11,5 @@ namespace BlendArMocapGUI
     void OnConfigWebcamDeviceSlot(int *value);
     void OnConfigMoviePath(char *value);
     bool IsDetecting();
-    void StartDetection();
-    void StopDetection();
+    void AssignSessionManager(BlendArMocap::SessionManager *sessionManager);
 }

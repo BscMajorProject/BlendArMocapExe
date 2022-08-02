@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string.h>
+#include "../session_manager.h"
 
 
 #define log(msg) std::clog << msg << std::endl
@@ -11,28 +12,26 @@ namespace BlendArMocapGUI{
     bool toggled_detection;
     int input_type;
     int webcam_slot;
-    char movie_path[256];
+    char movie_path[1024];
+    BlendArMocap::SessionManager *_sessionManager;
 
-    void StartDetection(){
-        log("INITIALIZING");
-
-        if (input_type == 0){
-            log("Stream Detection at");
-            log(webcam_slot);
-        }
-        else{
-            log("Movie Detection");
-            log(movie_path);
-        }
-
-        log("Input Type");
-        log(detection_type);
+    void AssignSessionManager(BlendArMocap::SessionManager *sessionManager){
+        _sessionManager = sessionManager;
     }
 
-    void StopDetection(){
-        log("FINISHED");
+    void OnToggleDetection(bool toggled){
+        if (toggled){
+            toggled_detection = !toggled_detection;
+            log(toggled_detection);
+            if (toggled_detection){
+                _sessionManager->StartSession(&detection_type, &input_type, &webcam_slot, movie_path);
+            }
+            else{
+                _sessionManager->EndSession();
+            }
+        }
     }
-
+    
     bool IsDetecting(){
         return !toggled_detection;
     }
@@ -44,20 +43,7 @@ namespace BlendArMocapGUI{
         }
     }
 
-    void OnToggleDetection(bool toggled){
-        if (toggled){
-            toggled_detection = !toggled_detection;
-            log(toggled_detection);
-            if (toggled_detection){
-                log("Start Detection");
-                StartDetection();
-            }
-            else{
-                log("Stop Detection");
-                StopDetection();
-            }
-        }
-    }
+    
 
     void OnConfigInputType(int *value){
         if (input_type != *value){

@@ -27,7 +27,7 @@
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/framework/formats/landmark.pb.h" // requires landmark pb
-
+#include "../../utils/string_utils.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
@@ -44,34 +44,35 @@ ABSL_FLAG(std::string, output_video_path, "",
           "Full path of where to save result (.mp4 only). "
           "If not provided, show result in a window.");
 
-mediapipe::CalculatorGraphConfig GetGraphConfig(std::string calculator_graph_config_contents){
-}
 
-
-absl::Status RunMPPGraph() {
+absl::Status RunMPPGraph(std::string path) {
     // init string for graph contents
     std::string calculator_graph_config_contents;
     // getting graph contents by flag
-    MP_RETURN_IF_ERROR(mediapipe::file::GetContents(
-        absl::GetFlag(FLAGS_calculator_graph_config_file),
-        &calculator_graph_config_contents));
+    // MP_RETURN_IF_ERROR(mediapipe::file::GetContents(
+    //     absl::GetFlag(FLAGS_calculator_graph_config_file),
+    //     &calculator_graph_config_contents));
 
+    MP_RETURN_IF_ERROR(mediapipe::file::GetContents(path, &calculator_graph_config_contents));
     // logging graph contents
     LOG(INFO) << "Get calculator graph config contents: " << calculator_graph_config_contents;
-    std::cout << "Get calculator graph config contents: " << calculator_graph_config_contents << std::endl;
+    // std::cout << "Get calculator graph config contents: " << calculator_graph_config_contents << std::endl;
     // parses the proto config to an calculator graph config
     mediapipe::CalculatorGraphConfig config =
         mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(
             calculator_graph_config_contents);
+    
+    std::cout << "PARSED PROTO" << std::endl;
 
-
-    // initializing the graph
     LOG(INFO) << "Initialize the calculator graph.";
-    std::cout << "Initialize the calculator graph." << std::endl;
+    // std::cout << "Initialize the calculator graph." << std::endl;
     mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
+    std::cout << "INIT GRAPH" << std::endl;
 
-
+    //////////////////////////////////////////////// PASSED ///////////////////////////////////////////////////
+    //////////////////////////////////////////////// PASSED ///////////////////////////////////////////////////
+    // initializing the graph
     // init camera or video
     LOG(INFO) << "Initialize the camera or load the video.";
     cv::VideoCapture capture;
@@ -82,6 +83,7 @@ absl::Status RunMPPGraph() {
         capture.open(0);
     }
     RET_CHECK(capture.isOpened());
+    std::cout << "OPEND CV2" << std::endl;
 
     cv::namedWindow(kWindowName, /*flags=WINDOW_AUTOSIZE*/ 1);
     #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 2)
@@ -91,23 +93,28 @@ absl::Status RunMPPGraph() {
     #endif
     
     // start running graph
+    std::cout << "TRY ATTACH POLLERS" << std::endl;
 
-    std::cout << "Start running the calculator graph." << std::endl;
+    // std::cout << "Start running the calculator graph." << std::endl;
     LOG(INFO) << "Start running the calculator graph.";
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                    graph.AddOutputStreamPoller(kOutputStream));
 
     // POLLER FOR DETECTION RESULTSE20220730 22:21:01.779698 27172 run_graph.cpp:177] Failed to run the graph: ; Unable to attach observer to output stream "output_detections" because it doesn't exist.
 
+
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller_detection, 
         graph.AddOutputStreamPoller(kDetectionsStream));
 
     
+    std::cout << "START RUNNING THE GRAPH" << std::endl;
     MP_RETURN_IF_ERROR(graph.StartRun({}));
 
     // start processing frames
     LOG(INFO) << "Start grabbing and processing frames.";
     bool grab_frames = true;
+    std::cout << "START PROCESSING FRAMES " << std::endl;
+
     while (grab_frames) {
         // Capture opencv camera or video frame.
         cv::Mat camera_frame_raw;
@@ -153,15 +160,16 @@ absl::Status RunMPPGraph() {
         auto& output_frame = packet.Get<mediapipe::ImageFrame>();
         auto& output_landmarks = detection_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>(); // and theres my data? :ooo
         // do something.. print??
-        for (int i = 0; i < output_landmarks.size(); i++)
-        {
-            mediapipe::NormalizedLandmarkList nll = output_landmarks[0];
-            auto ok = nll.DebugString();
-            std::cout << i << ok << std::endl;
+        // std::cout << "new res" << output_landmarks.size() << std::endl;
+        // for (int i = 0; i < output_landmarks.size(); i++)
+        // {
+        //     // mediapipe::NormalizedLandmarkList nll = output_landmarks[0];
+        //     // auto ok = nll.DebugString();
+        //     std::cout << i << std::endl;
+        // 
+        // }
+        // std::cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
 
-        }
-        std::cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
-       
         // Convert back to opencv for display or saving.
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
         cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2BGR);
@@ -172,6 +180,7 @@ absl::Status RunMPPGraph() {
         if (pressed_key >= 0 && pressed_key != 255) grab_frames = false;    
     } 
 
+    std::cout << "FINISHED" << std::endl;
     LOG(INFO) << "Shutting down.";
     MP_RETURN_IF_ERROR(graph.CloseInputStream(kInputStream));
     return graph.WaitUntilDone();
@@ -180,7 +189,11 @@ absl::Status RunMPPGraph() {
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
     absl::ParseCommandLine(argc, argv);
-    absl::Status run_status = RunMPPGraph();
+
+    std::string path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
+    // BlendArMocap::GetFileContents(path);
+    
+    absl::Status run_status = RunMPPGraph(path);
     if (!run_status.ok()) {
         LOG(ERROR) << "Failed to run the graph: " << run_status.message();
         return EXIT_FAILURE;

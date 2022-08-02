@@ -11,11 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-load(
-    "//mediapipe/framework/tool:mediapipe_graph.bzl",
-    "mediapipe_simple_subgraph",
-)
+# load("@mediapipe//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
+load("@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl", "mediapipe_simple_subgraph")
 
 licenses(["notice"])
 
@@ -24,12 +21,14 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "renderer_calculators",
     deps = [
-        "//mediapipe/calculators/core:split_proto_list_calculator",
-        "//mediapipe/calculators/util:annotation_overlay_calculator",
-        "//mediapipe/calculators/util:detections_to_render_data_calculator",
-        "//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-        "//mediapipe/calculators/util:rect_to_render_data_calculator",
-        "//mediapipe/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/core:split_proto_list_calculator",
+        "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
+        "@mediapipe//mediapipe/calculators/util:detections_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:rect_to_render_data_calculator",
+
+        "//src/mp/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
+        # "@mediapipe//mediapipe/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
     ],
 )
 
