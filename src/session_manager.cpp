@@ -3,40 +3,47 @@
 
 
 namespace BlendArMocap{
-    SessionManager::SessionManager(){
-        this->stream = CVStream();
+    GraphRunner my_graph;
+    cv::Mat rawImage;
+
+    cv::Mat RawTexture(){
+        int cols = 640;
+        int rows = 480;
+        uint8_t gArr[rows][cols];
+        for (int row = 0; row < rows; row++){
+            for (int col = 0; col < cols; col++){
+                gArr[row][col] = 0;
+            }
+        }
+        cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
+        cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
+        return image;
     }
 
     bool SessionManager::StartSession(int *detection_type, int *input_type, int *webcam_slot, char *movie_path){
-        if (!this->stream.Initialize(input_type, webcam_slot, movie_path)){
-            this->isActive = false;
-            return this->isActive;
-        }
-
-        absl::Status state = this->graph.Start("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
-        std::cout << state << std::endl;
-
-        this->isActive = true;
-        return this->isActive;
+        my_graph.InitGraphRunner("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
+        // absl::Status state = this->graph.Start("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
+        return true;
     }
 
-    void SessionManager::Update(){
-        if (this->isActive && this->stream.isActive && this->graph.isActive){
-            frame = this->stream.Frame();
-
-            if ((this->graph.ProcessFrame(frame)) == absl::OkStatus()){
-                std::cout << "frame ok" << std::endl;
-                this->frame = frame;
+    bool SessionManager::Update(){
+        if (my_graph.isActive)
+        {
+            if(my_graph.Update()){
+                this->frame = my_graph.Frame;
+            }
+            else{
+                this->frame = RawTexture();
             }
         }
-        else{
-            this->frame = this->stream.BlankFrame();
+        else
+        {
+            this->frame = RawTexture();
         }
+        return true;
     }
 
     void SessionManager::EndSession(){
-        this->isActive = false;
-        this->graph.Stop();
-        this->stream.Close();
+        my_graph.StopGraph();
     }
 }

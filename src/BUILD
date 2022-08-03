@@ -5,7 +5,6 @@ cc_library(
     srcs = ["session_manager.cpp"],
     hdrs = ["session_manager.h"],
     deps = [
-        "//src/mp:stream",
         "//src/mp:graph"
     ],
     visibility = ["//visibility:public"],
