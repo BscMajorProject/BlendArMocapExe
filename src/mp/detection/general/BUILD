@@ -32,11 +32,9 @@ cc_binary(
 
 cc_binary(
     name = "cpu_tracking_main",
-    srcs = [
-        "//src/mp/detection:run_graph",
-    ],
     deps = [
-        "//src/mp/detection:demo_lib"
+        "//src/mp/detection:run_my_graph",
+
         "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
         "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
         "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",

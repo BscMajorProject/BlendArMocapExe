@@ -4,8 +4,12 @@
 #include <cstdlib>
 #include <iostream>
 #include "string.h"
-#include <opencv2/opencv.hpp>
+#include "mediapipe/framework/port/opencv_highgui_inc.h"
+#include "mediapipe/framework/port/opencv_imgproc_inc.h"
+#include "mediapipe/framework/port/opencv_video_inc.h"
 
+
+//#include <opencv2/opencv.hpp>
 
 namespace BlendArMocap
 {

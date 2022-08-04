@@ -4,6 +4,8 @@ echo "runing bazel command $1 $2";
 
 if [ $1 == "build" ]
     then
+        export GLOG_logtostderr=1
+
         echo "Creating regular build"
         bazel build -c opt --define MEDIAPIPE_DISABLE_GPU=1 $2
 

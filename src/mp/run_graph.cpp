@@ -22,15 +22,12 @@ int test(){
         i+=1;
         cv::Mat frame = stream.Frame();
         if ((graph_runner.Update(frame)).ok()){
-            LOG(INFO) << "TRY PULLING";
             absl::StatusOr<cv::Mat> mp_frame = graph_runner.PollFrame();
-            LOG(INFO) << "Try Render?";
             if (mp_frame.ok()){ stream.RenderFrame(mp_frame.value()); }
-            else { stream.RenderFrame(stream.BlankFrame()); LOG(INFO) << "BLAAAANK frame"; }
-            LOG(INFO) << "next frame";
+            else { stream.RenderFrame(stream.BlankFrame()); }
         }
 
-        else { stream.RenderFrame(frame); }
+        else { stream.RenderFrame(frame); LOG(INFO) << "FAAAIILL frame"; }
     }
     return 1;
 }
