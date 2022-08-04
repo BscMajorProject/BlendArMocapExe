@@ -13,8 +13,12 @@ namespace BlendArMocap{
         std::string resultsJson; 
 
         bool StartSession(int *detection_type, int *input_type, int *webcam_slot, char *movie_path);
-        bool Update();
+        cv::Mat Update();
         void EndSession();
+    private:
+        GraphRunner graph;
+        cv::Mat rawImage;
+
     };
 }
 

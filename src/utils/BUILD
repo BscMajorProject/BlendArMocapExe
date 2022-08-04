@@ -6,7 +6,7 @@ cc_library(
 )
 
 cc_binary(
-    name="strings",
+    name="string_test",
     srcs=["string_utils.cpp"],
     data=["//src/utils/graph:face_mesh_desktop_live.pbtxt"],
     visibility = ["//visibility:public"],

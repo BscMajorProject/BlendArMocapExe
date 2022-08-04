@@ -27,7 +27,7 @@
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/framework/formats/landmark.pb.h" // requires landmark pb
-#include "../../utils/string_utils.h"
+// #include "../../utils/string_utils.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
@@ -72,13 +72,14 @@ absl::Status Init(std::string path){
 cv::VideoCapture capture;
 bool load_video;
 absl::Status InitOpenCV(){
+    capture.open(0);
     LOG(INFO) << "Initialize the camera or load the video.";
-    load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
-    if (load_video) {
-        capture.open(absl::GetFlag(FLAGS_input_video_path));
-    } else {
-        capture.open(0);
-    }
+    // load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
+    // if (load_video) {
+    //     capture.open(absl::GetFlag(FLAGS_input_video_path));
+    // } else {
+    //     capture.open(0);
+    // }
     RET_CHECK(capture.isOpened());
     std::cout << "OPEND CV2" << std::endl;
 
@@ -150,9 +151,11 @@ absl::Status RunMPPGraph(std::string path) {
     // basically the init phase
     Init(path);
     InitOpenCV();
+    LOG(INFO) <<"try assign poolers";
     if (!CreateUniquePoller()){
         return absl::UnimplementedError("EXCEPTED EXCEPTION :)");
     };
+    LOG(INFO) << "pollers assign try run graph";
     MP_RETURN_IF_ERROR(graph.StartRun({}));
 
     bool grab_frames = true;

@@ -35,13 +35,33 @@ cc_library(
         "@com_google_absl//absl/flags:parse",
     ],
 )
+cc_binary(
+    name = "run_demo_graph",
+    srcs = ["run_demo_graph.cc"],
+    deps = [
+        "@linux_opencv//:opencv",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/formats:image_frame",
+        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
+        "@mediapipe//mediapipe/framework/port:file_helpers",
+        "@mediapipe//mediapipe/framework/port:opencv_highgui",
+        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
+        "@mediapipe//mediapipe/framework/port:opencv_video",
+        "@mediapipe//mediapipe/framework/port:parse_text_proto",
+        "@mediapipe//mediapipe/framework/port:status",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+    ],
+)
+
 
 cc_binary(
-    name="my_graph",
-    srcs = ["run_graph.cpp"],
+    name="run_my_graph",
+    srcs = ["run_my_graph.cpp"],
 
     deps = [
-        "//src/utils:string_utils",
+        # "//src/utils:string_utils",
+        # "@linux_opencv//:opencv",
 
         "//src/mp/graphs/face_mesh:desktop_live_calculators",
         # "//src/mp/graphs/hand_tracking:desktop_tflite_calculators",

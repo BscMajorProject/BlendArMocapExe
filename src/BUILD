@@ -5,14 +5,14 @@ cc_library(
     srcs = ["session_manager.cpp"],
     hdrs = ["session_manager.h"],
     deps = [
-        "//src/mp:graph"
+        "//src/mp:graph_runner"
     ],
     visibility = ["//visibility:public"],
 )
 
 
 cc_binary(
-    name = "app",
+    name = "main",
     srcs = ["main.cpp"],
     deps = [
         "//src/gui:guilib",

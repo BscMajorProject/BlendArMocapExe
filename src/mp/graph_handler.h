@@ -35,6 +35,12 @@ namespace BlendArMocap
         absl::Status Stop();
 
     private:
+        const char kInputStream[12] = "input_video";
+        const char kOutputStream[14] = "output_video";
+        const char kWindowName[12] = "MediaPipe";
+        const char kDetectionsStream[24] = "multi_face_landmarks"; // STREAM FOR OUTPUT RESULTS && NAME GOT TO MATCH
+        
+
         bool isProcessing = false;
         mediapipe::CalculatorGraph graph;
         

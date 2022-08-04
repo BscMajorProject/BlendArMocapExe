@@ -1,7 +1,7 @@
 # TODO: dynamic platform specific libs
 cc_binary(
     name = "demo",
-    srcs = ["imgui_demo.cpp"],
+    srcs = ["demo.cpp"],
     deps = [
         "@dearimgui//:imgui_glfw",
         "@glfw_linux//:glfw",

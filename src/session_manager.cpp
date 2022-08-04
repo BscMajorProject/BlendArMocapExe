@@ -3,9 +3,6 @@
 
 
 namespace BlendArMocap{
-    GraphRunner my_graph;
-    cv::Mat rawImage;
-
     cv::Mat RawTexture(){
         int cols = 640;
         int rows = 480;
@@ -21,29 +18,21 @@ namespace BlendArMocap{
     }
 
     bool SessionManager::StartSession(int *detection_type, int *input_type, int *webcam_slot, char *movie_path){
-        my_graph.InitGraphRunner("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
+        this->graph.InitGraphRunner("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
         // absl::Status state = this->graph.Start("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
         return true;
     }
 
-    bool SessionManager::Update(){
-        if (my_graph.isActive)
-        {
-            if(my_graph.Update()){
-                this->frame = my_graph.Frame;
-            }
-            else{
-                this->frame = RawTexture();
-            }
+    cv::Mat SessionManager::Update(){
+        if (this->graph.isActive){
+            return this->graph.Update();
         }
-        else
-        {
-            this->frame = RawTexture();
+        else{
+            return RawTexture();
         }
-        return true;
     }
 
     void SessionManager::EndSession(){
-        my_graph.StopGraph();
+        this->graph.StopGraph();
     }
 }

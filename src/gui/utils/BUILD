@@ -1,5 +1,5 @@
 cc_binary(
-    name="raw",
+    name="opencv_raw",
     srcs=["opencv_raw.cpp"],
     deps=[
         "@dearimgui//:imgui_glfw",
@@ -12,7 +12,7 @@ cc_binary(
 
 
 cc_binary(
-    name="vid",
+    name="opencv_vid",
     srcs=["opencv_vid.cpp"],
     deps=[
         "@dearimgui//:imgui_glfw",

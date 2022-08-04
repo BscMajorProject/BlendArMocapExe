@@ -12,11 +12,10 @@ int main(int argc, char* argv[]){
     BlendArMocap::SessionManager sessionManager;
     GLFWwindow* window = BlendArMocapGUI::IntializeWindow(730, 730, "BlendArMocap");
     BlendArMocapGUI::AssignSessionManager(&sessionManager);
+    
     // run render loop while window is opened
     while(!glfwWindowShouldClose(window)){
-        if (sessionManager.Update()){
-            BlendArMocapGUI::Render(sessionManager.frame, window);
-        }
+        BlendArMocapGUI::Render(sessionManager.Update(), window);
     }
 
     BlendArMocapGUI::OnExitGUI();

@@ -3,10 +3,26 @@
 
 namespace BlendArMocap{
     CVStream::CVStream(){
-        this->rawImage = RawTexture();
+        int val = 0;
+        InitSelf(&val, &val, "", false);
     }
 
-    bool CVStream::Initialize(int *input_type, int *webcam_slot, char *movie_path){
+    CVStream::CVStream(int *input_type, int *webcam_slot, char *movie_path){
+        InitSelf(input_type, webcam_slot, movie_path, false);
+    }
+
+    CVStream::CVStream(int *input_type, int *webcam_slot, char *movie_path, bool init_window=false){
+        InitSelf(input_type, webcam_slot, movie_path, init_window=false);
+    }
+
+    CVStream::~CVStream(){
+        this->cap.release();
+        std::cout << "closed stream" << std::endl;
+    }
+
+    void CVStream::InitSelf(int *input_type, int *webcam_slot, char *movie_path, bool init_window){
+        this->rawImage = RawTexture();
+
         this->inputType = static_cast<InputType>(*input_type);
         switch (this->inputType)
         {
@@ -35,10 +51,20 @@ namespace BlendArMocap{
             break;
         }
 
-        this->isActive = true;
-        return this->isActive;
-    }
+        this->window_active = init_window;
+        if (this->window_active){
+            cv::namedWindow(this->kWindowName, /*flags=WINDOW_AUTOSIZE*/ 1);
+            #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 2)
+            this->cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+            this->cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+            this->cap.set(cv::CAP_PROP_FPS, 30);
+            #endif
+        }
 
+        this->isActive = true;
+    }
+    
+    // TODO: return status or frame (only use valid frames)
     cv::Mat CVStream::Frame(){
         cv::Mat frame;
         this->cap >> frame;
@@ -50,7 +76,7 @@ namespace BlendArMocap{
                 case MOVIE:
                 // closing movie stream
                 this->isActive=false;
-                this->Close();
+                delete this;
                 break;
             }
         }
@@ -60,6 +86,12 @@ namespace BlendArMocap{
         cv::flip(frame, dst, 1);
 
         return dst;
+    }
+
+    void CVStream::RenderFrame(cv::Mat frame){
+        cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+        cv::imshow(this->kWindowName, frame);
+        const int pressed_key = cv::waitKey(5);
     }
 
     cv::Mat CVStream::BlankFrame(){
@@ -78,10 +110,5 @@ namespace BlendArMocap{
         cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
         cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
         return image;
-    }
-
-
-    void CVStream::Close(){
-        this->cap.release();
     }
 }

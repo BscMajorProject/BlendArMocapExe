@@ -20,21 +20,26 @@ namespace BlendArMocap
 {
     class GraphRunner{
         public:
-        cv::Mat Frame;
-        absl::Status StopGraph();
-        absl::Status InitGraphRunner(std::string path);
-        
-        bool isActive = false;
-        bool Update();
+        GraphRunner(std::string path);
+        ~GraphRunner();
 
+        bool isActive = false;
+        absl::Status Update(cv::Mat cv_frame);
+        void StartRunner();
+
+        // todo moved in subtypes
+        absl::Status SetUniquePoller(char *output_stream);
+        cv::Mat GetPollerFrame();
+        absl::StatusOr<cv::Mat> PollFrame();
+        
         private:
+        std::unique_ptr<mediapipe::OutputStreamPoller> _poller;
+        const char kDetectionsStream[24] = "multi_face_landmarks"; // STREAM FOR OUTPUT RESULTS && NAME GOT TO MATCH
+        
+        mediapipe::CalculatorGraph graph;
+
         absl::Status InitMPGraph(std::string calculator_config_path);
-        absl::Status SetUniquePoller();
-        absl::Status SetUniqueMPFrame();
-        absl::Status DeleteGraph();
-        absl::Status GetPollerData();
-        absl::Status InitOpenCV();
-        absl::Status SetCameraFrame();
+        absl::Status SetUniqueMPFrame(cv::Mat cv_frame);
     };
 }
 
