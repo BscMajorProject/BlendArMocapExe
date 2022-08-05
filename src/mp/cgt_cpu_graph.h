@@ -21,11 +21,7 @@ namespace BlendArMocap
 {
     class CPUGraph {
     public:
-        enum DetectionType { HAND=0, FACE=1, POSE=2, HOLISTIC=3, IRIS=4 };
-        DetectionType detection_type;
-        // enum InputType { WEBCAM=0, VIDEO=1 };
-        // InputType input_type;
-        CPUGraph();
+        CPUGraph(std::string config_path);
         CPUGraph& operator=(const CPUGraph&) = default;
         CPUGraph(CPUGraph&&) = default;
         CPUGraph& operator=(CPUGraph&&) = default;
@@ -37,7 +33,6 @@ namespace BlendArMocap
         absl::Status InitCapture();
         absl::StatusOr<cv::Mat> GetCVFrame();
         absl::Status CreateUniqueMPFrame(cv::Mat *camera_frame);
-        // absl::Status SetUniquePoller(char *output_stream);
         absl::Status CloseGraph();
         absl::Status RenderFrame(cv::Mat ouput_frame_mat);
         cv::Mat output_frame_mat;
@@ -46,8 +41,6 @@ namespace BlendArMocap
     private:
         std::string config_file_path;
         cv::VideoCapture capture;
-        // std::unique_ptr<mediapipe::OutputStreamPoller> frame_poller;
-        // mediapipe::OutputStreamPoller frame_poller;
 
         // Protobuf graph configuration file.
         const char face_config_path[55] = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";

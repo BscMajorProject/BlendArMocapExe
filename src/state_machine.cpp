@@ -36,51 +36,77 @@ namespace BlendArMocap
 
     absl::Status StateMachine::SwitchState()
     {
-        LOG(INFO) << "SWITCHING TO " << this->designated_state << this->current_state;
         switch(this->designated_state)
         {
             case IDLE:
             {
                 absl::Status other = Idel();
-                SetState(this->designated_state);
             }
             break;
 
             case HAND:
             {
-                absl::Status some = FaceDetection();
-                SetState(this->designated_state);
+                this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
+                this->output_data = "landmarks";
+                absl::Status status = RunDetection();
+                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
             case FACE:
             {
-            LOG(INFO) << "User in face state.";
+                LOG(INFO) << "User in face state.";
+                this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
+                this->output_data = "multi_face_landmarks";
+                absl::Status status = RunDetection();
+                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
+
             }
             break;
 
             case POSE:
             {
                 LOG(INFO) << "User in pose state.";
+                this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
+                // TODO: Configure output data
+                absl::Status status = RunDetection();
+                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
+                LOG(INFO) << status;
             }
             break;
 
             case HOLISTIC:
             {
                 LOG(INFO) << "User in holistic state.";
+                this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
+                // TODO: Configure output data
+                absl::Status status = RunDetection();
+                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
+
             }
             break;
 
             case IRIS:
             {
                 LOG(INFO) << "User in iris state.";
+                this->config_file_path = "src/mp/graphs/iris_tracking/iris_tracking_cpu.pbtxt";
+                this->output_data = "face_landmarks_with_iris";
             }
 
             break;
 
             case FINISH:
+            break;
+        }
+
+        switch(this->designated_state)
+        {
+            case FINISH:
+            break;
+
+            default:
             {
-                LOG(INFO) << "Session finished successfully.";
+                SetState(this->designated_state);
             }
             break;
         }
@@ -92,40 +118,13 @@ namespace BlendArMocap
     {
         if (_state != this->current_state) 
         {
-            LOG(INFO) << "cur state " << this->current_state << "des state" << _state;
+            LOG(INFO) << "cur state: " << this->current_state << " designated state: " << _state;
             this->current_state = _state;
             this->designated_state = _state;
             SwitchState();
         }
 
         return absl::OkStatus();
-    }
-
-    StateMachine::State StateMachine::GetState()
-    {
-        return this->current_state;
-    }
-
-    absl::Status StateMachine::Reset() 
-    {
-        this->designated_state = IDLE;
-        absl::Status status = SwitchState();
-        if (!status.ok()) { return status; }
-        return absl::OkStatus();
-    }
-
-    cv::Mat StateMachine::RawTexture(){
-        int cols = 640;
-        int rows = 480;
-        uint8_t gArr[rows][cols];
-        for (int row = 0; row < rows; row++){
-            for (int col = 0; col < cols; col++){
-                gArr[row][col] = 0;
-            }
-        }
-        cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
-        cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
-        return image;
     }
 
     absl::Status StateMachine::Idel()
@@ -136,7 +135,7 @@ namespace BlendArMocap
         
         
             if (GUICallback()) {
-                LOG(INFO) << "Finished idle.";
+                // On Finish Idle
                 break;
             }
         
@@ -148,26 +147,28 @@ namespace BlendArMocap
         return absl::OkStatus();
     }
 
-    absl::Status StateMachine::FaceDetection()
+    absl::Status StateMachine::RunDetection()
     {
-        LOG(INFO) << "User in face tracking state.";
-        BlendArMocap::CPUGraph cpu_graph;
+        LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
+        BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
         if (!cpu_graph.Init().ok()) { absl::AbortedError("Init failed"); }
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
-        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller("multi_face_landmarks"));
+        // ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
         LOG(INFO) << "Start running graph";
     
         while (this->is_detecting) {
             if (!cpu_graph.Update().ok()) { LOG(INFO) << "UPDATE FAILED"; break; } 
-    
-            if (landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet data_packet;
-                if (!landmark_poller.Next(&data_packet)) { return absl::InternalError("Receiving poller packet failed."); }
-                auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
-            }
-    
+            
+            //if (landmark_poller.QueueSize() > 0 ){
+            //    LOG(INFO) << "polling landmarks";
+            //    mediapipe::Packet data_packet;
+            //    if (!landmark_poller.Next(&data_packet)) { return absl::InternalError("Receiving poller packet failed."); }
+            //    auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
+            //}
+            
             if (frame_poller.QueueSize() > 0 ){
+                LOG(INFO) << "polling frame";
                 mediapipe::Packet frame_packet;
                 if (!frame_poller.Next(&frame_packet)) { return absl::InternalError("Receiving poller packet failed."); }
                 auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
@@ -189,5 +190,19 @@ namespace BlendArMocap
     
         if (cpu_graph.CloseGraph().ok()) { LOG(INFO) << "SUCCESS"; }
         else { absl::AbortedError("Graph failed"); }
+    }
+
+    cv::Mat StateMachine::RawTexture(){
+        int cols = 640;
+        int rows = 480;
+        uint8_t gArr[rows][cols];
+        for (int row = 0; row < rows; row++){
+            for (int col = 0; col < cols; col++){
+                gArr[row][col] = 0;
+            }
+        }
+        cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
+        cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
+        return image;
     }
 }

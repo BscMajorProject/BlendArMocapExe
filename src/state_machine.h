@@ -19,19 +19,19 @@ namespace BlendArMocap
         absl::Status Reset();
 
     private:
-        bool switching_state;
         bool is_detecting = false;
         GLFWwindow* gui_window;
         cv::Mat raw_texture;
         State current_state;
-        State previous_state;
         State designated_state;
         absl::Status SwitchState();
         cv::Mat RawTexture();
         bool GUICallback();
-
+        
     private:
-        absl::Status FaceDetection();
+        char *config_file_path;
+        char *output_data;
+        absl::Status RunDetection();
         absl::Status Idel();
     };
 }

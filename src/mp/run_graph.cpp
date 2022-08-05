@@ -4,7 +4,7 @@
 #include "cgt_cpu_graph.h"
 
 absl::Status test(){
-    BlendArMocap::CPUGraph cpu_graph;
+    BlendArMocap::CPUGraph cpu_graph("src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt");
     if (!cpu_graph.Init().ok()) { absl::AbortedError("Init failed"); }
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller("multi_face_landmarks"));

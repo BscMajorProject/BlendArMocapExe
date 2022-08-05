@@ -3,33 +3,11 @@
 
 namespace BlendArMocap
 {
-    CPUGraph::CPUGraph()
+    CPUGraph::CPUGraph(std::string config_file_path)
     {
-        this->detection_type = FACE;
+        this->config_file_path = config_file_path;
         this->isVideo = false;
         this->debug = false;
-        switch(this->detection_type){
-            case HAND:
-            this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
-            this->output_data = "landmarks";
-            break;
-            case FACE:
-            this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
-            this->output_data = "multi_face_landmarks";
-            break;
-            case POSE:
-            this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
-            this->output_data = "pose_landmarks";
-            break;
-            case HOLISTIC:
-            this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
-            // TODO: Configure output data
-            break;
-            case IRIS:
-            this->config_file_path = "src/mp/graphs/iris_tracking/iris_tracking_cpu.pbtxt";
-            this->output_data = "face_landmarks_with_iris";
-            break;
-        }
     }
 
     absl::Status CPUGraph::Init(){
@@ -42,13 +20,6 @@ namespace BlendArMocap
         if (!capture_status.ok()) { return capture_status; }
         LOG(INFO) << "Start running the calculator graph.";
 
-        // // Attach pollers.
-        // ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller _poller, this->graph.AddOutputStreamPoller(output_stream));
-        // this->frame_poller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(_poller));
-        // // absl::Status poller_status = SetUniquePoller(this->output_stream);
-        // // if (!poller_status.ok()) { return poller_status; }
-        
-        // MP_RETURN_IF_ERROR(graph.StartRun({}));
         return absl::OkStatus();
     }
 
@@ -61,17 +32,7 @@ namespace BlendArMocap
         cv::Mat camera_frame = frame_status.value();
         if (!CreateUniqueMPFrame(&camera_frame).ok()) { 
             return absl::InternalError("Creating unique mp frame failed"); }
-
-        // LOG(INFO) << "Poll for img";
-        // mediapipe::Packet packet;
-        // if (!this->frame_poller->Next(&packet)) { return absl::InternalError("Receiving poller packet failed."); }
-        // LOG(INFO) << "Try get image from poller";
-        // auto &output_frame = packet.Get<mediapipe::ImageFrame>();
-        // 
-        // LOG(INFO) << "Assign Package";
-        // // Convert and render the output frame.
-        // this->output_frame_mat = mediapipe::formats::MatView(&output_frame);
-        // RenderFrame(output_frame_mat);
+        
         return absl::OkStatus();
     }
 
@@ -151,16 +112,6 @@ namespace BlendArMocap
 
         return absl::OkStatus();
     }
-
-    // absl::Status CPUGraph::SetUniquePoller(char *output_stream){
-    //     // Attachs a poller to the graph.
-    //     absl::StatusOr<mediapipe::OutputStreamPoller> status_or_poller = this->graph.AddOutputStreamPoller(output_stream);
-    //     if (!status_or_poller.ok()) { return status_or_poller.status(); }
-    // 
-    // 
-    //     this->poller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(status_or_poller.value()));
-    //     return absl::OkStatus();
-    // }
 
     absl::Status CPUGraph::CloseGraph(){
         LOG(INFO) << "Shutting down.";
