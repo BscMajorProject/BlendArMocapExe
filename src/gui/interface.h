@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef CGT_INTERFACE_
+#define CGT_INTERFACE_
 
 namespace BlendArMocapGUI
 {
@@ -9,3 +9,4 @@ namespace BlendArMocapGUI
     void OutputConfigPanel();
 }
 
+#endif

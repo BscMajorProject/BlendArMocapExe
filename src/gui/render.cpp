@@ -6,6 +6,7 @@
 #include <GL/gl3w.h>
 #include "interface.h"
 #include <GLFW/glfw3.h>
+#include "glog/logging.h"
 
 
 namespace BlendArMocapGUI
@@ -13,7 +14,8 @@ namespace BlendArMocapGUI
     bool *pOpen;
     static void glfw_error_callback(int error, const char* description)
     {
-        fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+        LOG(ERROR) << "Glfw Error" << error << description;
+        // fprintf(stderr, "Glfw Error %d: %s\n", error, description);
     }
 
 

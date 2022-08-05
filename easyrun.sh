@@ -1,3 +1,1 @@
-GLOG_logtostderr=1 
-
-bazel-bin/$1
+GLOG_logtostderr=1 bazel-bin/$1

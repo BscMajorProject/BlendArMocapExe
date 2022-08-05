@@ -22,17 +22,17 @@ cc_library(
         "callbacks.cpp",
         ],
     hdrs = [
-        "callbacks.h",
         "render.h",
         "interface.h",
+        "callbacks.h",
     ],
     deps = [
-        "//src:session_manager",
         "@dearimgui//:imgui_glfw",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",
-        "@opengl_linux//:gl"
+        "@opengl_linux//:gl",
+        "//src:status",
     ],
     copts = [
         "-I/usr/include",
@@ -45,6 +45,5 @@ cc_library(
         "-l:libglfw.so",
     ],
     visibility = ["//visibility:public"],
-
 )
 

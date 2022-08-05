@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef CGT_RENDER_
+#define CGT_RENDER_
 
 #include <opencv2/opencv.hpp>
 #include <GL/gl3w.h>
@@ -14,3 +14,5 @@ namespace BlendArMocapGUI{
     void OnExitGUI();
     void Render(cv::Mat frame, GLFWwindow* window);
 }
+
+#endif

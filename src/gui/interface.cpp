@@ -65,10 +65,7 @@ namespace BlendArMocapGUI
             else {
                 OnToggleDetection(ImGui::Button("Stop Detection"));
             }
-
-
-
-
+            
             ImGui::EndChild();
         }
         ImGui::Spacing();

@@ -1,26 +1,23 @@
-#include "absl/flags/flag.h"
+// #include "absl/flags/flag.h"
+// #include "mediapipe/framework/port/status.h"
 #include "glog/logging.h"
 #include "state_machine.h"
-#include "session_manager.h"
 #include "gui/render.h"
 #include "gui/callbacks.h"
 
-ABSL_FLAG(bool, release, false, "Write logs to file.");
+
+//ABSL_FLAG(bool, release, false, "Write logs to file - requires to set the --release=true flag on compile time.");
 
 
 int main(int argc, char* argv[]){
-    if (absl::GetFlag(FLAGS_release)) { google::SetLogDestination(0, "src/console.log"); }
+    // if (absl::GetFlag(FLAGS_release)) { google::SetLogDestination(0, "src/console.log"); }
     google::InitGoogleLogging(argv[0]);
+    google::LogToStderr();
     if( !glfwInit() ) { return -1; }
     
-    BlendArMocap::SessionManager sessionManager;
     GLFWwindow* window = BlendArMocapGUI::IntializeWindow(730, 730, "BlendArMocap");
-    BlendArMocapGUI::AssignSessionManager(&sessionManager);
-    
-    // run render loop while window is opened
-    while(!glfwWindowShouldClose(window)){
-        BlendArMocapGUI::Render(sessionManager.Update(), window);
-    }
+    BlendArMocap::StateMachine state_machine = BlendArMocap::StateMachine();
+    state_machine.RunRenderLoop(window);
 
     BlendArMocapGUI::OnExitGUI();
     return 0;
