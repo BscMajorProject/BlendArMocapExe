@@ -3,8 +3,8 @@
 
 #include <cstdlib>
 
-#include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/synchronization/mutex.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/image_frame.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"
@@ -14,6 +14,8 @@
 #include "mediapipe/framework/port/opencv_video_inc.h"
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
+#include "mediapipe/framework/graph_output_stream.h"
+#include "mediapipe/framework/formats/landmark.pb.h"
 
 namespace BlendArMocap
 {
@@ -23,8 +25,11 @@ namespace BlendArMocap
         DetectionType detection_type;
         // enum InputType { WEBCAM=0, VIDEO=1 };
         // InputType input_type;
-
         CPUGraph();
+        CPUGraph& operator=(const CPUGraph&) = default;
+        CPUGraph(CPUGraph&&) = default;
+        CPUGraph& operator=(CPUGraph&&) = default;
+
         absl::Status Update();
 
         absl::Status Init();
@@ -32,16 +37,17 @@ namespace BlendArMocap
         absl::Status InitCapture();
         absl::StatusOr<cv::Mat> GetCVFrame();
         absl::Status CreateUniqueMPFrame(cv::Mat *camera_frame);
-        absl::Status SetUniquePoller(char *output_stream);
+        // absl::Status SetUniquePoller(char *output_stream);
         absl::Status CloseGraph();
         absl::Status RenderFrame(cv::Mat ouput_frame_mat);
         cv::Mat output_frame_mat;
 
+        mediapipe::CalculatorGraph graph;
     private:
         std::string config_file_path;
-        mediapipe::CalculatorGraph graph;
         cv::VideoCapture capture;
-        std::unique_ptr<mediapipe::OutputStreamPoller> poller;
+        // std::unique_ptr<mediapipe::OutputStreamPoller> frame_poller;
+        // mediapipe::OutputStreamPoller frame_poller;
 
         // Protobuf graph configuration file.
         const char face_config_path[55] = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";

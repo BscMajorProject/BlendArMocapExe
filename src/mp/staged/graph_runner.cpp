@@ -1,16 +1,6 @@
 #include "graph_runner.h"
 
 
-ABSL_FLAG(std::string, calculator_graph_config_file, "",
-          "Name of file containing text format CalculatorGraphConfig proto.");
-ABSL_FLAG(std::string, input_video_path, "",
-          "Full path of video to load. "
-          "If not provided, attempt to use a webcam.");
-ABSL_FLAG(std::string, output_video_path, "",
-          "Full path of where to save result (.mp4 only). "
-          "If not provided, show result in a window.");
-
-
 namespace BlendArMocap
 {
     GraphRunner::GraphRunner(std::string pb_config_path){

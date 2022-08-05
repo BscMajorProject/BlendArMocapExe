@@ -1,9 +1,9 @@
 #ifndef CGT_SESSION_MANAGER_
 #define CGT_SESSION_MANAGER_
 
-// #include "mp/graph_handler.h"
-// #include "mp/cv_stream.h"
-#include "mp/graph_runner.h"
+#include "mediapipe/framework/port/opencv_highgui_inc.h"
+#include "mediapipe/framework/port/opencv_imgproc_inc.h"
+
 
 namespace BlendArMocap{
     class SessionManager{
@@ -15,8 +15,8 @@ namespace BlendArMocap{
         bool StartSession(int *detection_type, int *input_type, int *webcam_slot, char *movie_path);
         cv::Mat Update();
         void EndSession();
+
     private:
-        GraphRunner graph;
         cv::Mat rawImage;
 
     };

@@ -2,8 +2,6 @@
 #define CGT_GRAPH_RUNNER_
 
 #include <cstdlib>
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/image_frame.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"

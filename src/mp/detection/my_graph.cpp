@@ -152,10 +152,13 @@ absl::Status RunMPPGraph(std::string path_to_file)
 
     // attaching poller
     // TODO: Preferably as package for easier graph constuction
-    std::unique_ptr<mediapipe::OutputStreamPoller> poller;
-    absl::StatusOr<mediapipe::OutputStreamPoller> status_or_poller = SetUniquePoller(&graph, "output_video");
-    if (!status_or_poller.ok()) { return status_or_poller.status(); }
-    poller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(status_or_poller.value()));
+
+    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
+                     graph.AddOutputStreamPoller(kOutputStream));
+    // std::unique_ptr<mediapipe::OutputStreamPoller> poller;
+    // absl::StatusOr<mediapipe::OutputStreamPoller> status_or_poller = SetUniquePoller(&graph, "output_video");
+    // if (!status_or_poller.ok()) { return status_or_poller.status(); }
+    // poller = std::make_unique<mediapipe::OutputStreamPoller>(std::move(status_or_poller.value()));
 
     MP_RETURN_IF_ERROR(graph.StartRun({}));
 
@@ -174,7 +177,7 @@ absl::Status RunMPPGraph(std::string path_to_file)
         // Get the graph result packet, or stop if that fails.
         // TODO make use of packages
         mediapipe::Packet packet;
-        if (!poller->Next(&packet)) { break; }
+        if (!poller.Next(&packet)) { break; }
         auto &output_frame = packet.Get<mediapipe::ImageFrame>();
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
         RenderFrame(output_frame_mat);

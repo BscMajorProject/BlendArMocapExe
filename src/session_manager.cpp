@@ -18,21 +18,13 @@ namespace BlendArMocap{
     }
 
     bool SessionManager::StartSession(int *detection_type, int *input_type, int *webcam_slot, char *movie_path){
-        this->graph.InitGraphRunner("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
-        // absl::Status state = this->graph.Start("src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt");
         return true;
     }
 
     cv::Mat SessionManager::Update(){
-        if (this->graph.isActive){
-            return this->graph.Update();
-        }
-        else{
-            return RawTexture();
-        }
+        return RawTexture();
     }
 
     void SessionManager::EndSession(){
-        this->graph.StopGraph();
     }
 }
