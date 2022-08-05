@@ -15,7 +15,7 @@ namespace BlendArMocap
         enum State {  HAND, FACE, POSE, HOLISTIC, IRIS, NONE, IDLE, FINISH };
         State GetState();
         absl::Status SetState(State _state);
-        absl::Status RunRenderLoop(GLFWwindow* window);
+        absl::Status StartRenderLoop(GLFWwindow* window);
         absl::Status Reset();
 
     private:
@@ -26,9 +26,13 @@ namespace BlendArMocap
         State current_state;
         State previous_state;
         State designated_state;
-        absl::Status SwitchState(State designated_state);
+        absl::Status SwitchState();
         cv::Mat RawTexture();
         bool GUICallback();
+
+    private:
+        absl::Status FaceDetection();
+        absl::Status Idel();
     };
 }
 

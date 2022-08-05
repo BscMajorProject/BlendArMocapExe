@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     
     GLFWwindow* window = BlendArMocapGUI::IntializeWindow(730, 730, "BlendArMocap");
     BlendArMocap::StateMachine state_machine = BlendArMocap::StateMachine();
-    state_machine.RunRenderLoop(window);
+    state_machine.StartRenderLoop(window);
 
     BlendArMocapGUI::OnExitGUI();
     return 0;

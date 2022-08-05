@@ -1,19 +1,16 @@
 #include "state_machine.h"
+#include "mp/cgt_cpu_graph.h"
 
 
 namespace BlendArMocap
 {
     StateMachine::StateMachine()
     {
-        // casting state test
-
         this->raw_texture = RawTexture();
-        this->previous_state = NONE;
         this->current_state = NONE;
-        this->switching_state = false;
     }
     
-    absl::Status StateMachine::RunRenderLoop(GLFWwindow* window)
+    absl::Status StateMachine::StartRenderLoop(GLFWwindow* window)
     {
         this->gui_window = window;
         absl::Status app_state = SetState(IDLE);
@@ -30,7 +27,6 @@ namespace BlendArMocap
             char *movie_path = BlendArMocapGUI::Callback::instance()->movie_path;
 
             this->designated_state = static_cast<State>(detection_type);
-            LOG(INFO) << "DESIGNATED " << this->designated_state;
             this->is_detecting = BlendArMocapGUI::Callback::instance()->toggled_detection;
             return true;
         }
@@ -38,94 +34,68 @@ namespace BlendArMocap
         return false;
     }
 
-    absl::Status StateMachine::SwitchState(State designated_state)
+    absl::Status StateMachine::SwitchState()
     {
-        LOG(INFO) << "SWITCHING TO " << designated_state;
-        switch(designated_state)
+        LOG(INFO) << "SWITCHING TO " << this->designated_state << this->current_state;
+        switch(this->designated_state)
         {
             case IDLE:
-            LOG(INFO) << "User in idle state.";
-            while(!this->is_detecting){
-                BlendArMocapGUI::Render(this->raw_texture, this->gui_window); 
-
-
-                if (GUICallback()) {
-                    LOG(INFO) << "Attempt to set state";
-                    SetState(this->designated_state);
-                    LOG(INFO) << "Done switching";
-                }
-
-                if (glfwWindowShouldClose(this->gui_window)) {
-                    SetState(FINISH);
-                    break;
-                }
+            {
+                absl::Status other = Idel();
+                SetState(this->designated_state);
             }
             break;
 
             case HAND:
-            LOG(INFO) << "User in hand state.";
-
-            while(!this->is_detecting){
-                BlendArMocapGUI::Render(this->raw_texture, this->gui_window); 
-
-
-                if (GUICallback()) {
-
-                }
-
-                if (glfwWindowShouldClose(this->gui_window)) {
-                    SetState(FINISH);
-                    break;
-                }
+            {
+                absl::Status some = FaceDetection();
+                SetState(this->designated_state);
             }
             break;
 
             case FACE:
+            {
             LOG(INFO) << "User in face state.";
-
+            }
             break;
 
             case POSE:
-            LOG(INFO) << "User in pose state.";
-
+            {
+                LOG(INFO) << "User in pose state.";
+            }
             break;
 
             case HOLISTIC:
-            LOG(INFO) << "User in holistic state.";
-
+            {
+                LOG(INFO) << "User in holistic state.";
+            }
             break;
 
             case IRIS:
-            LOG(INFO) << "User in iris state.";
+            {
+                LOG(INFO) << "User in iris state.";
+            }
 
             break;
 
             case FINISH:
-            LOG(INFO) << "Closed app";
+            {
+                LOG(INFO) << "Session finished successfully.";
+            }
             break;
         }
-        LOG(INFO) << "SWITCHED TO " << designated_state;
 
-        // this is dump aswell =)
-        this->previous_state = this->current_state;
-        this->current_state = designated_state;
         return absl::OkStatus();
     }
 
     absl::Status StateMachine::SetState(State _state)
     {
-        if (_state != this->current_state && !this->switching_state) 
-        {   
-            LOG(INFO) << "switch 0";
-            this->switching_state = true;
-            LOG(INFO) << "switch 1";
-            absl::Status status = SwitchState(_state);
-            // below never happens (while loop in switch)
-            LOG(INFO) << "switch 2";
-            if (!status.ok()) { Reset(); }
-            LOG(INFO) << "switch 3";
-            this->switching_state = false;
-            LOG(INFO) << "switch 4";
+        if (_state != this->current_state) 
+        {
+            LOG(INFO) << "cur state " << this->current_state << "des state" << _state;
+            this->current_state = _state;
+            this->designated_state = _state;
+            SwitchState();
         }
 
         return absl::OkStatus();
@@ -138,12 +108,9 @@ namespace BlendArMocap
 
     absl::Status StateMachine::Reset() 
     {
-        this->switching_state = true;
-
-        absl::Status status = SwitchState(IDLE);
+        this->designated_state = IDLE;
+        absl::Status status = SwitchState();
         if (!status.ok()) { return status; }
-
-        this->switching_state = false;
         return absl::OkStatus();
     }
 
@@ -159,5 +126,68 @@ namespace BlendArMocap
         cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
         cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
         return image;
+    }
+
+    absl::Status StateMachine::Idel()
+    {
+        LOG(INFO) << "User in idle state.";
+        while(!this->is_detecting){
+            BlendArMocapGUI::Render(this->raw_texture, this->gui_window); 
+        
+        
+            if (GUICallback()) {
+                LOG(INFO) << "Finished idle.";
+                break;
+            }
+        
+            if (glfwWindowShouldClose(this->gui_window)) {
+                this->designated_state=FINISH;
+                break;
+            }
+        }
+        return absl::OkStatus();
+    }
+
+    absl::Status StateMachine::FaceDetection()
+    {
+        LOG(INFO) << "User in face tracking state.";
+        BlendArMocap::CPUGraph cpu_graph;
+        if (!cpu_graph.Init().ok()) { absl::AbortedError("Init failed"); }
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller("multi_face_landmarks"));
+        MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
+        LOG(INFO) << "Start running graph";
+    
+        while (this->is_detecting) {
+            if (!cpu_graph.Update().ok()) { LOG(INFO) << "UPDATE FAILED"; break; } 
+    
+            if (landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!landmark_poller.Next(&data_packet)) { return absl::InternalError("Receiving poller packet failed."); }
+                auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
+            }
+    
+            if (frame_poller.QueueSize() > 0 ){
+                mediapipe::Packet frame_packet;
+                if (!frame_poller.Next(&frame_packet)) { return absl::InternalError("Receiving poller packet failed."); }
+                auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
+                cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+                cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+                BlendArMocapGUI::Render(output_frame_mat, this->gui_window); 
+            }
+    
+            if (GUICallback()) {
+                this->designated_state=IDLE;
+                break;
+            }
+    
+            if (glfwWindowShouldClose(this->gui_window)) {
+                this->designated_state=FINISH;
+                break;
+            }
+        }
+    
+        if (cpu_graph.CloseGraph().ok()) { LOG(INFO) << "SUCCESS"; }
+        else { absl::AbortedError("Graph failed"); }
     }
 }

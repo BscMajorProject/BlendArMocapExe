@@ -7,7 +7,7 @@ namespace BlendArMocap
     {
         this->detection_type = FACE;
         this->isVideo = false;
-        this->debug = true;
+        this->debug = false;
         switch(this->detection_type){
             case HAND:
             this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";

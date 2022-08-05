@@ -38,6 +38,7 @@ cc_library(
     hdrs = ["state_machine.h"],
     deps = [
         "//src/gui:guilib",
+        "//src/mp:cgt_cpu_graph",
         ":status",
     ],
     visibility = ["//visibility:public"],
