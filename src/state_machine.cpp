@@ -188,8 +188,8 @@ namespace BlendArMocap
             }
         }
     
-        if (cpu_graph.CloseGraph().ok()) { LOG(INFO) << "SUCCESS"; }
-        else { absl::AbortedError("Graph failed"); }
+        if (cpu_graph.CloseGraph().ok()) { return absl::OkStatus(); }
+        else { return absl::InternalError("Closing Graph failed."); }
     }
 
     cv::Mat StateMachine::RawTexture(){

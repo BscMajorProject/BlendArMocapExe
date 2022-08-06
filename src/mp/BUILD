@@ -19,32 +19,6 @@ package(default_visibility = [
 ])
 
 
-cc_binary(
-    name="my_graph",
-    srcs=["my_graph.cpp"],
-    deps = [
-        # attaching input deps
-        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
-        "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
-        "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
-        "@mediapipe//mediapipe/graphs/iris_tracking:iris_tracking_cpu_video_input_deps",
-        "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
-        # graph deps
-        "@mediapipe//mediapipe/framework:calculator_framework",
-        "@mediapipe//mediapipe/framework/formats:image_frame",
-        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
-        "@mediapipe//mediapipe/framework/port:file_helpers",
-        "@mediapipe//mediapipe/framework/port:opencv_highgui",
-        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
-        "@mediapipe//mediapipe/framework/port:opencv_video",
-        "@mediapipe//mediapipe/framework/port:parse_text_proto",
-        "@mediapipe//mediapipe/framework/port:status",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:parse",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
 cc_library(
     name="cgt_cpu_graph",
     srcs=["cgt_cpu_graph.cpp"],
@@ -75,7 +49,7 @@ cc_library(
 )
 
 cc_binary(
-    name = "run_graph",
-    srcs = ["run_graph.cpp"],
+    name = "test_graph",
+    srcs = ["test_graph.cpp"],
     deps = [":cgt_cpu_graph"],
 )
