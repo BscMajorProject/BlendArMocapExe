@@ -10,12 +10,10 @@ namespace BlendArMocap
         this->current_state = NONE;
     }
     
-    absl::Status StateMachine::StartRenderLoop(GLFWwindow* window)
+    void StateMachine::StartRenderLoop(GLFWwindow* window)
     {
         this->gui_window = window;
-        absl::Status app_state = SetState(IDLE);
-        if (!app_state.ok()) { return app_state; }
-        return absl::OkStatus();
+        SetState(IDLE);
     }
 
     bool StateMachine::GUICallback(){
@@ -47,6 +45,7 @@ namespace BlendArMocap
 
             case HAND:
             {
+                LOG(INFO) << "HAND DETECTION";
                 this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
                 this->output_data = "landmarks";
                 status = RunDetection();
@@ -56,7 +55,7 @@ namespace BlendArMocap
 
             case FACE:
             {
-                LOG(INFO) << "User in face state.";
+                LOG(INFO) << "FACE DETECTION";
                 this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
                 this->output_data = "multi_face_landmarks";
                 status = RunDetection();
@@ -66,7 +65,7 @@ namespace BlendArMocap
 
             case POSE:
             {
-                LOG(INFO) << "User in pose state.";
+                LOG(INFO) << "POSE DETECTION";
                 this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
                 // TODO: Configure output data
                 status = RunDetection();
@@ -76,23 +75,19 @@ namespace BlendArMocap
 
             case HOLISTIC:
             {
-                LOG(INFO) << "User in holistic state.";
+                LOG(INFO) << "HOLISTIC DETECTION";
                 this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
                 // TODO: Configure output data
                 status = RunDetection();
             }
             break;
 
-            case IRIS:
-            {
-                LOG(INFO) << "User in iris state.";
-                this->config_file_path = "src/mp/graphs/iris_tracking/iris_tracking_cpu.pbtxt";
-                this->output_data = "face_landmarks_with_iris";
-            }
-            break;
-
             case FINISH:
             return absl::OkStatus();
+            break;
+
+            default:
+            return absl::UnknownError("State machine failed");
             break;
         }
 
@@ -105,7 +100,7 @@ namespace BlendArMocap
         else { SetState(this->designated_state); }
     }
 
-    absl::Status StateMachine::SetState(State _state)
+    void StateMachine::SetState(State _state)
     {
         if (_state != this->current_state) 
         {
@@ -114,8 +109,6 @@ namespace BlendArMocap
             this->designated_state = _state;
             SwitchState();
         }
-
-        return absl::OkStatus();
     }
 
     absl::Status StateMachine::Idel()

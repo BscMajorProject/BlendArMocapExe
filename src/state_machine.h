@@ -13,12 +13,11 @@ namespace BlendArMocap
     public:
         StateMachine();
         enum State {  HAND, FACE, POSE, HOLISTIC, IRIS, NONE, IDLE, FINISH };
-        State GetState();
-        absl::Status SetState(State _state);
-        absl::Status StartRenderLoop(GLFWwindow* window);
+        void StartRenderLoop(GLFWwindow* window);
         absl::Status Reset();
 
     private:
+        void SetState(State _state);
         bool is_detecting = false;
         GLFWwindow* gui_window;
         cv::Mat raw_texture;
