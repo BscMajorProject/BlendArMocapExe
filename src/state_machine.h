@@ -31,6 +31,7 @@ namespace BlendArMocap
         char *config_file_path;
         char *output_data;
         absl::Status RunDetection();
+        absl::Status HolisticDetection();
         absl::Status Idel();
     };
 }

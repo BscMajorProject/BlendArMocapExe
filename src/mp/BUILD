@@ -25,11 +25,16 @@ cc_library(
     hdrs=["cgt_cpu_graph.h"],
     deps=[
         # attaching input deps
-        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
-        "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
-        "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
-        "@mediapipe//mediapipe/graphs/iris_tracking:iris_tracking_cpu_video_input_deps",
-        "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
+        "//src/mp/graphs/face_mesh:face_tracking_cpu_deps",
+        "//src/mp/graphs/hand_tracking:hand_tracking_cpu_deps",
+        "//src/mp/graphs/holistic_tracking:holistic_tracking_cpu_deps",
+        "//src/mp/graphs/iris_tracking:iris_tracking_cpu_deps",
+        "//src/mp/graphs/pose_tracking:pose_tracking_cpu_deps",
+        # "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+        # "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
+        # "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
+        # "@mediapipe//mediapipe/graphs/iris_tracking:iris_tracking_cpu_video_input_deps",
+        # "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
         # graph deps
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/formats:image_frame",
@@ -52,29 +57,4 @@ cc_binary(
     name = "test_graph",
     srcs = ["test_graph.cpp"],
     deps = [":cgt_cpu_graph"],
-)
-
-cc_binary(
-    name = "demo_run_graph_main",
-    srcs = ["demo_run_graph_main.cc"],
-    deps = [
-        # attaching input deps
-        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
-        "@mediapipe//mediapipe/graphs/face_mesh:desktop_live_calculators",
-        "@mediapipe//mediapipe/graphs/holistic_tracking:holistic_tracking_cpu_graph_deps",
-        "@mediapipe//mediapipe/graphs/iris_tracking:iris_tracking_cpu_video_input_deps",
-        "@mediapipe//mediapipe/graphs/pose_tracking:pose_tracking_cpu_deps",
-        # graph deps
-        "@mediapipe//mediapipe/framework:calculator_framework",
-        "@mediapipe//mediapipe/framework/formats:image_frame",
-        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
-        "@mediapipe//mediapipe/framework/port:file_helpers",
-        "@mediapipe//mediapipe/framework/port:opencv_highgui",
-        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
-        "@mediapipe//mediapipe/framework/port:opencv_video",
-        "@mediapipe//mediapipe/framework/port:parse_text_proto",
-        "@mediapipe//mediapipe/framework/port:status",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:parse",
-    ],
 )

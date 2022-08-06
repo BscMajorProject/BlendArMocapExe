@@ -10,7 +10,7 @@
 "src/mp/graphs/iris_tracking/iris_tracking_cpu.pbtxt"
 */
 absl::Status test(){
-    BlendArMocap::CPUGraph cpu_graph("src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt");
+    BlendArMocap::CPUGraph cpu_graph("src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt");
     if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init graph failed"); }
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
     //ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller("multi_face_landmarks"));
@@ -49,9 +49,7 @@ absl::Status test(){
 }
 
 int main(){
-    for (int i=0; i < 2; i++){
-        test();
-    }
+    test();
    
     return 0;
 }

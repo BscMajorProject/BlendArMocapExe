@@ -7,12 +7,6 @@ input_stream: "IMAGE:input_image"
 # Collection of detected/predicted faces, each represented as a list of
 # landmarks. (std::vector<NormalizedLandmarkList>)
 input_stream: "LANDMARKS:multi_face_landmarks"
-# Regions of interest calculated based on palm detections.
-# (std::vector<NormalizedRect>)
-input_stream: "NORM_RECTS:rects"
-# Detected palms. (std::vector<Detection>)
-input_stream: "DETECTIONS:detections"
-
 # CPU image with rendered data. (ImageFrame)
 output_stream: "IMAGE:output_image"
 
@@ -20,19 +14,6 @@ node {
   calculator: "ImagePropertiesCalculator"
   input_stream: "IMAGE:input_image"
   output_stream: "SIZE:image_size"
-}
-
-# Converts detections to drawing primitives for annotation overlay.
-node {
-  calculator: "DetectionsToRenderDataCalculator"
-  input_stream: "DETECTIONS:detections"
-  output_stream: "RENDER_DATA:detections_render_data"
-  node_options: {
-    [type.googleapis.com/mediapipe.DetectionsToRenderDataCalculatorOptions] {
-      thickness: 4.0
-      color { r: 0 g: 255 b: 0 }
-    }
-  }
 }
 
 # Outputs each element of multi_face_landmarks at a fake timestamp for the rest
@@ -53,9 +34,9 @@ node {
   output_stream: "RENDER_DATA:landmarks_render_data"
   node_options: {
     [type.googleapis.com/mediapipe.LandmarksToRenderDataCalculatorOptions] {
-      landmark_color { r: 255 g: 0 b: 0 }
-      connection_color { r: 0 g: 255 b: 0 }
-      thickness: 2
+      landmark_color { r: 0 g: 217 b: 231 }
+      connection_color { r: 255 g: 255 b: 255 }
+      thickness: 0.5
       visualize_landmark_depth: false
     }
   }
@@ -71,26 +52,10 @@ node {
   output_stream: "ITERABLE:multi_face_landmarks_render_data"
 }
 
-# Converts normalized rects to drawing primitives for annotation overlay.
-node {
-  calculator: "RectToRenderDataCalculator"
-  input_stream: "NORM_RECTS:rects"
-  output_stream: "RENDER_DATA:rects_render_data"
-  node_options: {
-    [type.googleapis.com/mediapipe.RectToRenderDataCalculatorOptions] {
-      filled: false
-      color { r: 255 g: 0 b: 0 }
-      thickness: 4.0
-    }
-  }
-}
-
 # Draws annotations and overlays them on top of the input images.
 node {
   calculator: "AnnotationOverlayCalculator"
   input_stream: "IMAGE:input_image"
-  input_stream: "detections_render_data"
   input_stream: "VECTOR:0:multi_face_landmarks_render_data"
-  input_stream: "rects_render_data"
   output_stream: "IMAGE:output_image"
 }

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load(
-    "//mediapipe/framework/tool:mediapipe_graph.bzl",
+    "@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl",
     "mediapipe_simple_subgraph",
 )
 
@@ -26,33 +26,15 @@ mediapipe_simple_subgraph(
     graph = "hand_renderer_cpu.pbtxt",
     register_as = "HandRendererSubgraph",
     deps = [
-        "//mediapipe/calculators/core:begin_loop_calculator",
-        "//mediapipe/calculators/core:end_loop_calculator",
-        "//mediapipe/calculators/core:gate_calculator",
-        "//mediapipe/calculators/core:split_vector_calculator",
-        "//mediapipe/calculators/util:annotation_overlay_calculator",
-        "//mediapipe/calculators/util:collection_has_min_size_calculator",
-        "//mediapipe/calculators/util:detections_to_render_data_calculator",
-        "//mediapipe/calculators/util:labels_to_render_data_calculator",
-        "//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-        "//mediapipe/calculators/util:rect_to_render_data_calculator",
-    ],
-)
-
-mediapipe_simple_subgraph(
-    name = "hand_renderer_gpu",
-    graph = "hand_renderer_gpu.pbtxt",
-    register_as = "HandRendererSubgraph",
-    deps = [
-        "//mediapipe/calculators/core:begin_loop_calculator",
-        "//mediapipe/calculators/core:end_loop_calculator",
-        "//mediapipe/calculators/core:gate_calculator",
-        "//mediapipe/calculators/core:split_vector_calculator",
-        "//mediapipe/calculators/util:annotation_overlay_calculator",
-        "//mediapipe/calculators/util:collection_has_min_size_calculator",
-        "//mediapipe/calculators/util:detections_to_render_data_calculator",
-        "//mediapipe/calculators/util:labels_to_render_data_calculator",
-        "//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-        "//mediapipe/calculators/util:rect_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
+        "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
+        "@mediapipe//mediapipe/calculators/core:gate_calculator",
+        "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
+        "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
+        "@mediapipe//mediapipe/calculators/util:collection_has_min_size_calculator",
+        "@mediapipe//mediapipe/calculators/util:detections_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:labels_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:rect_to_render_data_calculator",
     ],
 )

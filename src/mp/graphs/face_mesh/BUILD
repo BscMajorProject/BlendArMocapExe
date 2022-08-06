@@ -13,9 +13,6 @@
 # limitations under the License.
 exports_files(["face_mesh_desktop_live.pbtxt"])
 
-
-
-
 load(
     "@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl",
     "mediapipe_binary_graph",
@@ -26,29 +23,11 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "desktop_calculators",
-    deps = [
-        "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
-        "@mediapipe//mediapipe/calculators/video:opencv_video_decoder_calculator",
-        "@mediapipe//mediapipe/calculators/video:opencv_video_encoder_calculator",
-
-        "//src/mp/graphs/face_mesh/subgraphs:face_renderer_cpu",
-        "//src/mp/modules/face_landmark:face_landmark_front_cpu",
-        # "@mediapipe//mediapipe/graphs/face_mesh/subgraphs:face_renderer_cpu",
-        # "@mediapipe//mediapipe/modules/face_landmark:face_landmark_front_cpu",
-    ],
-)
-
-cc_library(
-    name = "desktop_live_calculators",
+    name = "face_tracking_cpu_deps",
     deps = [
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
         "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
-
-        # "//src/mp/graphs/face_mesh/subgraphs:face_renderer_cpu",
-        # "//src/mp/modules/face_landmark:face_landmark_front_cpu",
-        
         "@mediapipe//mediapipe/modules/face_landmark:face_landmark_front_cpu",
-        "@mediapipe//mediapipe/graphs/face_mesh/subgraphs:face_renderer_cpu",
+        "//src/mp/graphs/face_mesh/subgraphs:face_renderer_cpu",
     ],
 )

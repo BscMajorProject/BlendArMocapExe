@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load(
-    "//mediapipe/framework/tool:mediapipe_graph.bzl",
+    "@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl",
     "mediapipe_binary_graph",
     "mediapipe_simple_subgraph",
 )
@@ -27,44 +27,26 @@ mediapipe_simple_subgraph(
     graph = "holistic_tracking_to_render_data.pbtxt",
     register_as = "HolisticTrackingToRenderData",
     deps = [
-        "//mediapipe/calculators/core:concatenate_proto_list_calculator",
-        "//mediapipe/calculators/core:concatenate_vector_calculator",
-        "//mediapipe/calculators/core:merge_calculator",
-        "//mediapipe/calculators/core:split_proto_list_calculator",
-        "//mediapipe/calculators/core:split_vector_calculator",
-        "//mediapipe/calculators/util:detections_to_render_data_calculator",
-        "//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-        "//mediapipe/calculators/util:rect_to_render_data_calculator",
-        "//mediapipe/calculators/util:rect_to_render_scale_calculator",
-        "//mediapipe/modules/holistic_landmark:hand_wrist_for_pose",
+        "@mediapipe//mediapipe/calculators/core:concatenate_proto_list_calculator",
+        "@mediapipe//mediapipe/calculators/core:concatenate_vector_calculator",
+        "@mediapipe//mediapipe/calculators/core:merge_calculator",
+        "@mediapipe//mediapipe/calculators/core:split_proto_list_calculator",
+        "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
+        "@mediapipe//mediapipe/calculators/util:detections_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:rect_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:rect_to_render_scale_calculator",
+        "@mediapipe//mediapipe/modules/holistic_landmark:hand_wrist_for_pose",
     ],
 )
 
 cc_library(
-    name = "holistic_tracking_gpu_deps",
+    name = "holistic_tracking_cpu_deps",
     deps = [
         ":holistic_tracking_to_render_data",
-        "//mediapipe/calculators/core:flow_limiter_calculator",
-        "//mediapipe/calculators/image:image_properties_calculator",
-        "//mediapipe/calculators/util:annotation_overlay_calculator",
-        "//mediapipe/modules/holistic_landmark:holistic_landmark_gpu",
-    ],
-)
-
-mediapipe_binary_graph(
-    name = "holistic_tracking_gpu",
-    graph = "holistic_tracking_gpu.pbtxt",
-    output_name = "holistic_tracking_gpu.binarypb",
-    deps = [":holistic_tracking_gpu_deps"],
-)
-
-cc_library(
-    name = "holistic_tracking_cpu_graph_deps",
-    deps = [
-        ":holistic_tracking_to_render_data",
-        "//mediapipe/calculators/core:flow_limiter_calculator",
-        "//mediapipe/calculators/image:image_properties_calculator",
-        "//mediapipe/calculators/util:annotation_overlay_calculator",
-        "//mediapipe/modules/holistic_landmark:holistic_landmark_cpu",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
+        "@mediapipe//mediapipe/calculators/image:image_properties_calculator",
+        "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
+        "@mediapipe//mediapipe/modules/holistic_landmark:holistic_landmark_cpu",
     ],
 )

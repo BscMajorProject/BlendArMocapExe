@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load(
-    "//mediapipe/framework/tool:mediapipe_graph.bzl",
+    "@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl",
     "mediapipe_binary_graph",
 )
 
@@ -22,29 +22,12 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "pose_tracking_gpu_deps",
-    deps = [
-        "//mediapipe/calculators/core:constant_side_packet_calculator",
-        "//mediapipe/calculators/core:flow_limiter_calculator",
-        "//mediapipe/graphs/pose_tracking/subgraphs:pose_renderer_gpu",
-        "//mediapipe/modules/pose_landmark:pose_landmark_gpu",
-    ],
-)
-
-mediapipe_binary_graph(
-    name = "pose_tracking_gpu_binary_graph",
-    graph = "pose_tracking_gpu.pbtxt",
-    output_name = "pose_tracking_gpu.binarypb",
-    deps = [":pose_tracking_gpu_deps"],
-)
-
-cc_library(
     name = "pose_tracking_cpu_deps",
     deps = [
-        "//mediapipe/calculators/core:constant_side_packet_calculator",
-        "//mediapipe/calculators/core:flow_limiter_calculator",
-        "//mediapipe/graphs/pose_tracking/subgraphs:pose_renderer_cpu",
-        "//mediapipe/modules/pose_landmark:pose_landmark_cpu",
+        "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
+        "//src/mp/graphs/pose_tracking/subgraphs:pose_renderer_cpu",
+        "@mediapipe//mediapipe/modules/pose_landmark:pose_landmark_cpu",
     ],
 )
 

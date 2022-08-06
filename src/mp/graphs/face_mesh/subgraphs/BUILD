@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# load("@mediapipe//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
+
 load("@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl", "mediapipe_simple_subgraph")
 
 licenses(["notice"])
@@ -23,21 +23,8 @@ cc_library(
     deps = [
         "@mediapipe//mediapipe/calculators/core:split_proto_list_calculator",
         "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
-        "@mediapipe//mediapipe/calculators/util:detections_to_render_data_calculator",
         "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-        "@mediapipe//mediapipe/calculators/util:rect_to_render_data_calculator",
-
-        "//src/mp/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
-        # "@mediapipe//mediapipe/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
-    ],
-)
-
-mediapipe_simple_subgraph(
-    name = "face_renderer_gpu",
-    graph = "face_renderer_gpu.pbtxt",
-    register_as = "FaceRendererGpu",
-    deps = [
-        ":renderer_calculators",
+        "@mediapipe//mediapipe/graphs/face_mesh/calculators:face_landmarks_to_render_data_calculator",
     ],
 )
 

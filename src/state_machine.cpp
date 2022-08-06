@@ -47,7 +47,7 @@ namespace BlendArMocap
             {
                 LOG(INFO) << "HAND DETECTION";
                 this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
-                this->output_data = "landmarks";
+                this->output_data = "hand_landmarks";
                 status = RunDetection();
                 if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
@@ -67,7 +67,7 @@ namespace BlendArMocap
             {
                 LOG(INFO) << "POSE DETECTION";
                 this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
-                // TODO: Configure output data
+                this->output_data = "pose_landmarks";
                 status = RunDetection();
                 if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
@@ -77,8 +77,9 @@ namespace BlendArMocap
             {
                 LOG(INFO) << "HOLISTIC DETECTION";
                 this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
-                // TODO: Configure output data
-                status = RunDetection();
+                this->output_data = ""; // custom method
+                status = HolisticDetection();
+                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
@@ -100,16 +101,23 @@ namespace BlendArMocap
         else { SetState(this->designated_state); }
     }
 
+
     void StateMachine::SetState(State _state)
     {
+        LOG(INFO) << "cur state: " << this->current_state << " designated state: " << _state;
         if (_state != this->current_state) 
         {
-            LOG(INFO) << "cur state: " << this->current_state << " designated state: " << _state;
             this->current_state = _state;
             this->designated_state = _state;
             SwitchState();
         }
+        else 
+        { 
+            this->designated_state = FINISH; 
+            SwitchState();
+        }
     }
+
 
     absl::Status StateMachine::Idel()
     {
@@ -130,13 +138,16 @@ namespace BlendArMocap
         return absl::OkStatus();
     }
 
+
     absl::Status StateMachine::RunDetection()
     {
         LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
         BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
+        
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
+        
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
         LOG(INFO) << "Start running graph";
     
@@ -147,7 +158,17 @@ namespace BlendArMocap
             if (landmark_poller.QueueSize() > 0 ){
                 mediapipe::Packet data_packet;
                 if (!landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
+                // TODO: CONSIDER SEPERATE METHODS TO NOT RELY ON SWITCH?
+                switch (this->current_state){
+                    case POSE: {
+                    auto &landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+                    }
+                    break;
+                    default: {
+                    auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
+                    }
+                    break;
+                }
             }
 
             mediapipe::Packet frame_packet;
@@ -171,6 +192,83 @@ namespace BlendArMocap
         if (cpu_graph.CloseGraph().ok()) { return absl::OkStatus(); }
         else { return absl::InternalError("Closing Graph failed."); }
     }
+    
+    struct HolisticLandmarkData {
+        mediapipe::NormalizedLandmarkList pose_landmarks = {};
+        mediapipe::NormalizedLandmarkList face_landmarks = {};
+        mediapipe::NormalizedLandmarkList  left_hand_landmarks = {};
+        mediapipe::NormalizedLandmarkList  right_hand_landmarks = {};
+    };
+
+
+    absl::Status StateMachine::HolisticDetection()
+    {
+        LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
+        BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
+        if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
+        
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller pose_landmark_poller, cpu_graph.graph.AddOutputStreamPoller("pose_landmarks"));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller face_landmark_poller, cpu_graph.graph.AddOutputStreamPoller("face_landmarks"));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller left_hand_landmark_poller, cpu_graph.graph.AddOutputStreamPoller("left_hand_landmarks"));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller right_hand_landmark_poller, cpu_graph.graph.AddOutputStreamPoller("right_hand_landmarks"));
+
+        MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
+        LOG(INFO) << "Start running graph";
+
+        HolisticLandmarkData container;
+        while (this->is_detecting) {
+            absl::Status graph_update_status = cpu_graph.Update();
+            if (!graph_update_status.ok()) { LOG(ERROR) << "Updating graph failed: " << graph_update_status; break; } 
+            
+            if (pose_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!pose_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                container.pose_landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+            }
+
+            if (face_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!face_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                container.face_landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+            }
+
+
+            if (left_hand_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!left_hand_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                container.left_hand_landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+            }
+
+
+            if (right_hand_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!right_hand_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                container.right_hand_landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+            }
+
+            mediapipe::Packet frame_packet;
+            if (!frame_poller.Next(&frame_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+            auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
+            cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+            cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+            BlendArMocapGUI::Render(output_frame_mat, this->gui_window); 
+    
+            if (GUICallback()) {
+                this->designated_state=IDLE;
+                break;
+            }
+    
+            if (glfwWindowShouldClose(this->gui_window)) {
+                this->designated_state=FINISH;
+                break;
+            }
+        }
+    
+        if (cpu_graph.CloseGraph().ok()) { return absl::OkStatus(); }
+        else { return absl::InternalError("Closing Graph failed."); }
+    }
+
 
     cv::Mat StateMachine::RawTexture(){
         int cols = 640;
