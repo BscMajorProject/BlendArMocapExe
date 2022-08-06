@@ -42,9 +42,6 @@ namespace BlendArMocap
         std::string config_file_path;
         cv::VideoCapture capture;
 
-        // Protobuf graph configuration file.
-        const char face_config_path[55] = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
-
         // OpenCV Rendering for debugging purposes.
         bool debug;
         char window_name[24] = "TestingGraph";

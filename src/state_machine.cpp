@@ -16,6 +16,7 @@ namespace BlendArMocap
         SetState(IDLE);
     }
 
+    // GUI Callback triggers when user starts or ends detection.
     bool StateMachine::GUICallback(){
         if (this->is_detecting != BlendArMocapGUI::Callback::instance()->toggled_detection){
             LOG(INFO) << "User toggled detection";
@@ -84,6 +85,7 @@ namespace BlendArMocap
             break;
 
             case FINISH:
+            LOG(INFO) << "Application terminated.";
             return absl::OkStatus();
             break;
 
@@ -92,19 +94,28 @@ namespace BlendArMocap
             break;
         }
 
-        if (!status.ok()) 
-        { 
-            LOG(ERROR) << status; 
-            if (this->current_state != IDLE) { SetState(IDLE); }
-            else { return absl::AbortedError("Application failed in IDLE state."); }
+        switch (current_state){
+            case FINISH:
+            break;
+
+            default:
+            {
+                if (!status.ok()) 
+                { 
+                    LOG(ERROR) << status; 
+                    if (this->current_state != IDLE) { SetState(IDLE); }
+                    else { return absl::AbortedError("Application failed in IDLE state."); }
+                }
+                else { SetState(this->designated_state); }
+            }
+            break;
         }
-        else { SetState(this->designated_state); }
     }
 
 
     void StateMachine::SetState(State _state)
     {
-        LOG(INFO) << "cur state: " << this->current_state << " designated state: " << _state;
+        LOG(INFO) << "Current State: " << this->current_state << " -> Designated State: " << _state;
         if (_state != this->current_state) 
         {
             this->current_state = _state;
@@ -131,7 +142,7 @@ namespace BlendArMocap
             }
         
             if (glfwWindowShouldClose(this->gui_window)) {
-                this->designated_state=FINISH;
+                SetState(FINISH);
                 break;
             }
         }
@@ -141,7 +152,6 @@ namespace BlendArMocap
 
     absl::Status StateMachine::RunDetection()
     {
-        LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
         BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         
@@ -184,7 +194,7 @@ namespace BlendArMocap
             }
     
             if (glfwWindowShouldClose(this->gui_window)) {
-                this->designated_state=FINISH;
+                SetState(FINISH);
                 break;
             }
         }
@@ -203,7 +213,6 @@ namespace BlendArMocap
 
     absl::Status StateMachine::HolisticDetection()
     {
-        LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
         BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         
@@ -260,7 +269,7 @@ namespace BlendArMocap
             }
     
             if (glfwWindowShouldClose(this->gui_window)) {
-                this->designated_state=FINISH;
+                SetState(FINISH);
                 break;
             }
         }

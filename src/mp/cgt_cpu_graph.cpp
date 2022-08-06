@@ -3,6 +3,7 @@
 
 namespace BlendArMocap
 {
+    // TODO: Add video input
     CPUGraph::CPUGraph(std::string config_file_path)
     {
         this->config_file_path = config_file_path;
@@ -18,7 +19,7 @@ namespace BlendArMocap
         // Init OpenCV capture.
         absl::Status capture_status = InitCapture();
         if (!capture_status.ok()) { return capture_status; }
-        LOG(INFO) << "Start running the calculator graph.";
+        LOG(INFO) << "Graph initialized.";
 
         return absl::OkStatus();
     }
@@ -44,7 +45,7 @@ namespace BlendArMocap
         if (!paresed_contents.ok()) { return absl::InternalError( "Failed to read configuration file." ); }
 
         // Parse the protobuffer configuration contents.
-        LOG(INFO) << "Get calculator graph config contents: " << calculator_graph_config_contents;
+        LOG(INFO) << "Getting calculator graph config contents.";
         mediapipe::CalculatorGraphConfig config = mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(calculator_graph_config_contents);
 
         // Initialize the graph.
@@ -115,7 +116,7 @@ namespace BlendArMocap
     }
 
     absl::Status CPUGraph::CloseGraph(){
-        LOG(INFO) << "Shutting down.";
+        LOG(INFO) << "Closing the graph.";
         MP_RETURN_IF_ERROR(this->graph.CloseInputStream(this->input_stream));
         return this->graph.WaitUntilDone();
     }
