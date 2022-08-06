@@ -1,0 +1,10 @@
+Log file created at: 2022/08/06 23:58:17
+Running on machine: denys-systemproductname
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220806 23:58:17.783414 114704 state_machine.cpp:119] Current State: 5 -> Designated State: 6
+I20220806 23:58:17.783557 114704 state_machine.cpp:136] User in idle state.
+I20220806 23:58:19.757635 114704 state_machine.cpp:103] Switching to new State.
+I20220806 23:58:19.757660 114704 state_machine.cpp:119] Current State: 6 -> Designated State: 7
+I20220806 23:58:19.757669 114704 state_machine.cpp:88] Application terminated.
+I20220806 23:58:19.757678 114704 main.cpp:22] Exit renderloop
+I20220806 23:58:20.041667 114704 main.cpp:24] Shutdown

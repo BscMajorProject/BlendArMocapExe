@@ -40,6 +40,7 @@ namespace BlendArMocap
         {
             case IDLE:
             {
+                LOG(INFO) << "IDLE";
                 status = Idel();
             }
             break;
@@ -85,21 +86,22 @@ namespace BlendArMocap
             break;
 
             case FINISH:
-            LOG(INFO) << "Application terminated.";
-            return absl::OkStatus();
+            { LOG(INFO) << "Application terminated."; }
             break;
 
             default:
-            return absl::UnknownError("State machine failed");
+            { return absl::UnknownError("State machine failed"); }
             break;
         }
 
         switch (current_state){
             case FINISH:
+            { }
             break;
 
             default:
             {
+                LOG(INFO) << "Switching to new State.";
                 if (!status.ok()) 
                 { 
                     LOG(ERROR) << status; 
@@ -132,7 +134,6 @@ namespace BlendArMocap
 
     absl::Status StateMachine::Idel()
     {
-        LOG(INFO) << "User in idle state.";
         while(!this->is_detecting){
             BlendArMocapGUI::Render(this->raw_texture, this->gui_window); 
         
@@ -142,7 +143,7 @@ namespace BlendArMocap
             }
         
             if (glfwWindowShouldClose(this->gui_window)) {
-                SetState(FINISH);
+                this->designated_state = FINISH;
                 break;
             }
         }
@@ -194,7 +195,7 @@ namespace BlendArMocap
             }
     
             if (glfwWindowShouldClose(this->gui_window)) {
-                SetState(FINISH);
+                this->designated_state = FINISH;
                 break;
             }
         }
@@ -269,7 +270,7 @@ namespace BlendArMocap
             }
     
             if (glfwWindowShouldClose(this->gui_window)) {
-                SetState(FINISH);
+                this->designated_state = FINISH;
                 break;
             }
         }
