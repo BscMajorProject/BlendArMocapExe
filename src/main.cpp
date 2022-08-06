@@ -19,6 +19,7 @@ int main(int argc, char* argv[]){
     BlendArMocap::StateMachine state_machine = BlendArMocap::StateMachine();
     absl::Status exit_state = state_machine.StartRenderLoop(window);
     if (!exit_state.ok()) { LOG(ERROR) << exit_state; }
+    else { LOG(INFO) << "Stopped running."; }
     BlendArMocapGUI::OnExitGUI();
     return 0;
 }

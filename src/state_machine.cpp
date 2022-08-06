@@ -36,11 +36,12 @@ namespace BlendArMocap
 
     absl::Status StateMachine::SwitchState()
     {
+        absl::Status status;
         switch(this->designated_state)
         {
             case IDLE:
             {
-                absl::Status other = Idel();
+                status = Idel();
             }
             break;
 
@@ -48,7 +49,7 @@ namespace BlendArMocap
             {
                 this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
                 this->output_data = "landmarks";
-                absl::Status status = RunDetection();
+                status = RunDetection();
                 if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
@@ -58,9 +59,8 @@ namespace BlendArMocap
                 LOG(INFO) << "User in face state.";
                 this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
                 this->output_data = "multi_face_landmarks";
-                absl::Status status = RunDetection();
+                status = RunDetection();
                 if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
-
             }
             break;
 
@@ -69,9 +69,8 @@ namespace BlendArMocap
                 LOG(INFO) << "User in pose state.";
                 this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
                 // TODO: Configure output data
-                absl::Status status = RunDetection();
+                status = RunDetection();
                 if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
-                LOG(INFO) << status;
             }
             break;
 
@@ -80,9 +79,7 @@ namespace BlendArMocap
                 LOG(INFO) << "User in holistic state.";
                 this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
                 // TODO: Configure output data
-                absl::Status status = RunDetection();
-                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
-
+                status = RunDetection();
             }
             break;
 
@@ -92,26 +89,20 @@ namespace BlendArMocap
                 this->config_file_path = "src/mp/graphs/iris_tracking/iris_tracking_cpu.pbtxt";
                 this->output_data = "face_landmarks_with_iris";
             }
-
             break;
 
             case FINISH:
+            return absl::OkStatus();
             break;
         }
 
-        switch(this->designated_state)
-        {
-            case FINISH:
-            break;
-
-            default:
-            {
-                SetState(this->designated_state);
-            }
-            break;
+        if (!status.ok()) 
+        { 
+            LOG(ERROR) << status; 
+            if (this->current_state != IDLE) { SetState(IDLE); }
+            else { return absl::AbortedError("Application failed in IDLE state."); }
         }
-
-        return absl::OkStatus();
+        else { SetState(this->designated_state); }
     }
 
     absl::Status StateMachine::SetState(State _state)
@@ -135,7 +126,6 @@ namespace BlendArMocap
         
         
             if (GUICallback()) {
-                // On Finish Idle
                 break;
             }
         
@@ -151,31 +141,28 @@ namespace BlendArMocap
     {
         LOG(INFO) << "Detection started: " << this->current_state << this->config_file_path;
         BlendArMocap::CPUGraph cpu_graph(this->config_file_path);
-        if (!cpu_graph.Init().ok()) { absl::AbortedError("Init failed"); }
+        if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
-        // ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
+        ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
         LOG(INFO) << "Start running graph";
     
         while (this->is_detecting) {
-            if (!cpu_graph.Update().ok()) { LOG(INFO) << "UPDATE FAILED"; break; } 
+            absl::Status graph_update_status = cpu_graph.Update();
+            if (!graph_update_status.ok()) { LOG(ERROR) << "Updating graph failed: " << graph_update_status; break; } 
             
-            //if (landmark_poller.QueueSize() > 0 ){
-            //    LOG(INFO) << "polling landmarks";
-            //    mediapipe::Packet data_packet;
-            //    if (!landmark_poller.Next(&data_packet)) { return absl::InternalError("Receiving poller packet failed."); }
-            //    auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
-            //}
-            
-            if (frame_poller.QueueSize() > 0 ){
-                LOG(INFO) << "polling frame";
-                mediapipe::Packet frame_packet;
-                if (!frame_poller.Next(&frame_packet)) { return absl::InternalError("Receiving poller packet failed."); }
-                auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
-                cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
-                cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
-                BlendArMocapGUI::Render(output_frame_mat, this->gui_window); 
+            if (landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet data_packet;
+                if (!landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
             }
+
+            mediapipe::Packet frame_packet;
+            if (!frame_poller.Next(&frame_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+            auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
+            cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+            cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+            BlendArMocapGUI::Render(output_frame_mat, this->gui_window); 
     
             if (GUICallback()) {
                 this->designated_state=IDLE;

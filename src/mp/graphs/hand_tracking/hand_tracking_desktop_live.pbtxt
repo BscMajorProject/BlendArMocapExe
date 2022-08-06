@@ -8,7 +8,6 @@ input_stream: "input_video"
 
 # CPU image. (ImageFrame)
 output_stream: "output_video"
-# output_stream: "landmarks"
 
 # Generates side packet cotaining max number of hands to detect/track.
 node {

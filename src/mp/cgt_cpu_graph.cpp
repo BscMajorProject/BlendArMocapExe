@@ -26,7 +26,8 @@ namespace BlendArMocap
     absl::Status CPUGraph::Update(){
         // Capture camera or video frame.
         absl::StatusOr<cv::Mat> frame_status = GetCVFrame();
-        if (!frame_status.ok()) { return absl::InternalError("Receiving image failed."); }
+        if (!frame_status.ok()) { 
+            return absl::InternalError("Receiving open cv frame failed."); }
 
         // Create an unique image frame.
         cv::Mat camera_frame = frame_status.value();

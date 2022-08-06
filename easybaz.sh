@@ -1,6 +1,6 @@
-# Script for testing bazel builds containing the mediapipe repro
+# Bazel build helper script
 
-echo "runing bazel command $1 $2";
+echo "running bazel command $1 $2";
 
 if [ $1 == "build" ]
     then
@@ -20,7 +20,7 @@ elif [ $1 == "debug" ]
         export GLOG_logtostderr=1
 
         echo "Creating debug build"
-        bazel build -c opt --define MEDIAPIPE_DISABLE_GPU=1 $2 -c dbg
+        bazel build -c dbg --define MEDIAPIPE_DISABLE_GPU=1 $2
 else
     echo "None of the conditions met"
     echo "USAGE: ./easybaz.sh [build | query | debug] src/path:cc_binary"
