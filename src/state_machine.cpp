@@ -33,7 +33,7 @@ namespace BlendArMocap
         return false;
     }
 
-    absl::Status StateMachine::SwitchState()
+    void StateMachine::SwitchState()
     {
         absl::Status status;
         switch(this->designated_state)
@@ -90,13 +90,13 @@ namespace BlendArMocap
             break;
 
             default:
-            { return absl::UnknownError("State machine failed"); }
+            { LOG(ERROR) << "State machine failed"; }
             break;
         }
 
         switch (current_state){
             case FINISH:
-            { }
+            {  }
             break;
 
             default:
@@ -106,7 +106,7 @@ namespace BlendArMocap
                 { 
                     LOG(ERROR) << status; 
                     if (this->current_state != IDLE) { SetState(IDLE); }
-                    else { return absl::AbortedError("Application failed in IDLE state."); }
+                    else { LOG(ERROR) << "Application failed in IDLE state."; }
                 }
                 else { SetState(this->designated_state); }
             }
@@ -173,6 +173,8 @@ namespace BlendArMocap
                 switch (this->current_state){
                     case POSE: {
                     auto &landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
+                    std::string json = ParseLandmarks::NormalizedLandmarkListToJson(landmarks, 33);
+                    LOG(INFO) << json;
                     }
                     break;
                     default: {

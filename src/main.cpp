@@ -1,19 +1,20 @@
-// #include "absl/flags/flag.h"
-// #include "mediapipe/framework/port/status.h"
 #include "glog/logging.h"
 #include "state_machine.h"
 #include "gui/render.h"
 #include "gui/callbacks.h"
 
 
-//ABSL_FLAG(bool, release, false, "Write logs to file - requires to set the --release=true flag on compile time.");
-
-
 int main(int argc, char* argv[]){
-    // if (absl::GetFlag(FLAGS_release)) { google::SetLogDestination(0, "console.log"); }
     google::InitGoogleLogging(argv[0]);
-    //google::LogToStderr();
-    google::SetLogDestination(0, "console.log");
+
+    google::LogToStderr();
+#ifdef _OPT
+    LOG(INFO) << "DEBUG MODE";
+#else
+    LOG(INFO) << "RELEASE MODE";
+#endif
+    // google::SetLogDestination(0, "console.log"); 
+    //google::SetLogDestination(0, "console.log");
     if( !glfwInit() ) { return -1; }
     LOG(INFO) << "Initialized BlendArMocap";
     

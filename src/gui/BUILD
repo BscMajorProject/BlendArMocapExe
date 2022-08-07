@@ -32,7 +32,7 @@ cc_library(
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",
         "@opengl_linux//:gl",
-        "//src:status",
+        "//src:absl",
     ],
     copts = [
         "-I/usr/include",

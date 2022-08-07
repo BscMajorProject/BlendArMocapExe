@@ -43,6 +43,7 @@ namespace BlendArMocapGUI
         // }
     }
 
+    bool toggled;
     void DetectionPanel(){
         {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
@@ -59,13 +60,15 @@ namespace BlendArMocapGUI
         {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
             ImGui::BeginChild("ChildR", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 20), false, 0);
+
             if (IsDetecting()){
-                OnToggleDetection(ImGui::Button("Start Detection"));
+                toggled = ImGui::Button("Start Detection###detection_button");
             }
             else {
-                OnToggleDetection(ImGui::Button("Stop Detection"));
+                toggled = ImGui::Button("Stop Detection###detection_button");
             }
-            
+            OnToggleDetection(toggled);
+
             ImGui::EndChild();
         }
         ImGui::Spacing();

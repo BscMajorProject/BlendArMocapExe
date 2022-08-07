@@ -6,6 +6,8 @@
 #include "glog/logging.h"
 #include "gui/callbacks.h"
 #include "absl/status/status.h"
+#include "utils/parse_landmarks.h"
+
 
 namespace BlendArMocap
 {
@@ -23,7 +25,7 @@ namespace BlendArMocap
         cv::Mat raw_texture;
         State current_state;
         State designated_state;
-        absl::Status SwitchState();
+        void SwitchState();
         cv::Mat RawTexture();
         bool GUICallback();
         

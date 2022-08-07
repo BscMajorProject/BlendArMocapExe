@@ -1,13 +1,10 @@
 cc_library(
-    name="string_utils",
-    hdrs=["string_utils.h"],
-    srcs=["string_utils.cpp"],
-    visibility = ["//visibility:public"],
-)
-
-cc_binary(
-    name="string_test",
-    srcs=["string_utils.cpp"],
-    data=["//src/utils/graph:face_mesh_desktop_live.pbtxt"],
+    name="parse_landmarks",
+    srcs=["parse_landmarks.cpp"],
+    hdrs=["parse_landmarks.h"],
+    deps=[
+        "//src:absl",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+    ],
     visibility = ["//visibility:public"],
 )

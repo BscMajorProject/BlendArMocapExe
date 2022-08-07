@@ -1,5 +1,5 @@
 cc_library(
-    name = "status",
+    name = "absl",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_glog_glog//:glog",
@@ -8,6 +8,8 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
+        # "@com_google_absl//absl/flags:flag",
+        # "@com_google_absl//absl/flags:parse",
     ],
 )
 
@@ -18,7 +20,8 @@ cc_library(
     deps = [
         "//src/gui:guilib",
         "//src/mp:cgt_cpu_graph",
-        ":status",
+        "//src/utils:parse_landmarks",
+        ":absl",
     ],
     visibility = ["//visibility:public"],
 )
@@ -30,7 +33,7 @@ cc_binary(
     deps = [
         "//src/gui:guilib",
         ":state_machine",
-        ":status",
+        ":absl",
     ],
     visibility = ["//visibility:public"],
 )

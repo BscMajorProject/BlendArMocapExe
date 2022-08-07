@@ -19,7 +19,13 @@ elif [ $1 == "debug" ]
         export GLOG_logtostderr=1
         echo "Creating debug build"
         bazel build -c dbg --define MEDIAPIPE_DISABLE_GPU=1 $2
+
+elif [ $1 == "release" ]
+    then
+        echo "Creating release build"
+        bazel build -c opt --define MEDIAPIPE_DISABLE_GPU=1 --define release_build=true  $2
+
 else
     echo "None of the conditions met"
-    echo "USAGE: ./easybaz.sh [build | query | debug] src/path:cc_binary"
+    echo "USAGE: ./easybaz.sh [release | build | query | debug] src/path:cc_binary"
 fi
