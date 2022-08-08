@@ -6,15 +6,8 @@
 
 int main(int argc, char* argv[]){
     google::InitGoogleLogging(argv[0]);
-
     google::LogToStderr();
-#ifdef _OPT
-    LOG(INFO) << "DEBUG MODE";
-#else
-    LOG(INFO) << "RELEASE MODE";
-#endif
     // google::SetLogDestination(0, "console.log"); 
-    //google::SetLogDestination(0, "console.log");
     if( !glfwInit() ) { return -1; }
     LOG(INFO) << "Initialized BlendArMocap";
     
@@ -26,3 +19,4 @@ int main(int argc, char* argv[]){
     LOG(INFO) << "Shutdown";
     return 0;
 }
+

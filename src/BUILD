@@ -15,12 +15,14 @@ cc_library(
 
 cc_library(
     name = "state_machine",
-    srcs = ["state_machine.cpp"],
+    srcs = ["state_machine.cpp", "machine_states.cpp"],
     hdrs = ["state_machine.h"],
     deps = [
         "//src/gui:guilib",
         "//src/mp:cgt_cpu_graph",
         "//src/utils:parse_landmarks",
+        "@mediapipe//mediapipe/framework/formats:classification_cc_proto",
+        "//src/socket:client",
         ":absl",
     ],
     visibility = ["//visibility:public"],

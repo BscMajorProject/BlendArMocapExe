@@ -9,6 +9,7 @@ input_stream: "input_video"
 # CPU image. (ImageFrame)
 output_stream: "output_video"
 output_stream: "hand_landmarks"
+output_stream: "handedness"
 
 # Generates side packet cotaining max number of hands to detect/track.
 node {
@@ -27,7 +28,7 @@ node {
   input_stream: "IMAGE:input_video"
   input_side_packet: "NUM_HANDS:num_hands"
   output_stream: "LANDMARKS:hand_landmarks"
-  # output_stream: "HANDEDNESS:handedness"
+  output_stream: "HANDEDNESS:handedness"
   # output_stream: "PALM_DETECTIONS:multi_palm_detections"
   # output_stream: "HAND_ROIS_FROM_LANDMARKS:multi_hand_rects"
   # output_stream: "HAND_ROIS_FROM_PALM_DETECTIONS:multi_palm_rects"

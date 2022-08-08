@@ -7,8 +7,10 @@
 #include "gui/callbacks.h"
 #include "absl/status/status.h"
 #include "utils/parse_landmarks.h"
+#include "mediapipe/framework/formats/classification.pb.h"
+#include "socket/client.h"
 
-
+#include "mp/cgt_cpu_graph.h"
 namespace BlendArMocap
 {
     class StateMachine {
@@ -28,12 +30,15 @@ namespace BlendArMocap
         void SwitchState();
         cv::Mat RawTexture();
         bool GUICallback();
+        bool OnGUIInteraction();
+        void RenderMPFrame(mediapipe::Packet frame_packet);
         
     private:
         char *config_file_path;
         char *output_data;
         absl::Status RunDetection();
         absl::Status HolisticDetection();
+        absl::Status HandDetection();
         absl::Status Idel();
     };
 }
