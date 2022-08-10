@@ -33,4 +33,12 @@ namespace ParseLandmarks
         os << "}";
         return os.str();
     }
+
+    std::string AddDescriptor(std::string contents, std::string descriptor){
+        std::ostringstream os;
+        os << "{";
+        os << "\"" << descriptor << "\": " << contents;
+        os << "}";
+        return os.str();
+    }
 }

@@ -16,7 +16,7 @@ namespace BlendArMocap
     class StateMachine {
     public:
         StateMachine();
-        enum State {  HAND, FACE, POSE, HOLISTIC, IRIS, NONE, IDLE, FINISH };
+        enum State {  HAND=0, FACE=1, POSE=2, HOLISTIC=3, IRIS=4, NONE=5, IDLE=6, FINISH=7 };
         void StartRenderLoop(GLFWwindow* window);
         absl::Status Reset();
 

@@ -1,4 +1,5 @@
 // Server side C/C++ program to demonstrate Socket
+// https://www.geeksforgeeks.org/socket-programming-cc/
 // programming
 #include <netinet/in.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@ int main(int argc, char const* argv[])
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
-    char buffer[32767] = { 0 };
+    char buffer[1024] = { 0 };
     char* hello = "Hello from server";
   
     // Creating socket file descriptor
@@ -56,7 +57,7 @@ int main(int argc, char const* argv[])
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read(new_socket, buffer, 32767);
+    valread = read(new_socket, buffer, 1024);
     printf("%s\n", buffer);
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");

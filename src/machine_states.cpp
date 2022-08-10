@@ -36,9 +36,7 @@ namespace BlendArMocap
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
         LOG(INFO) << "Start running graph";
 
-        // Start client socket if available endpoint.
         Client client = Client();
-
         while (this->is_detecting) {
             // Update the graph
             absl::Status graph_update_status = cpu_graph.Update();
@@ -53,7 +51,8 @@ namespace BlendArMocap
                     case POSE: {
                     auto &landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
                     if (client.connected) {
-                        std::string json = ParseLandmarks::NormalizedLandmarkListToJson(landmarks, 33);
+                        std::string contents = ParseLandmarks::NormalizedLandmarkListToJson(landmarks, 33);
+                        std::string json = ParseLandmarks::AddDescriptor(contents, "POSE");
                         client.Send(json);
                         }
                     }
@@ -61,14 +60,11 @@ namespace BlendArMocap
                     case FACE: {
                     if (client.connected) {
                         auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
-                        std::string json = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 468);
+                        std::string contents = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 468);
+                        std::string json = ParseLandmarks::AddDescriptor(contents, "FACE");
                         client.Send(json);
                         }
                     }
-
-                    default: 
-                    { LOG(ERROR) << "Wrong state accessed: " << current_state; }
-                    break;
                 }
             }
 
@@ -104,7 +100,6 @@ namespace BlendArMocap
         while (this->is_detecting) {
             absl::Status graph_update_status = cpu_graph.Update();
             if (!graph_update_status.ok()) { LOG(ERROR) << "Updating graph failed: " << graph_update_status; break; } 
-            
             // Poll data.
             if (landmark_poller.QueueSize() > 0 && headness_poller.QueueSize() > 0){
                 // Getting landmarks and headness.
@@ -121,16 +116,16 @@ namespace BlendArMocap
                 // Both hands detected.
                 if (headness.size() == 2 && landmarks.size() == 2){
                     std::string hand_headness = headness[0].classification()[0].label();
-                    std::string other_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 20);
+                    std::string other_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 21);
                     
                     if (hand_headness == "Right") {
-                        std::string left_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 20);
+                        std::string left_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[1], 21);
                         results.push_back(left_hand);
                         results.push_back(other_hand);
                     }
 
                     else {
-                        std::string right_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 20);
+                        std::string right_hand = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[1], 21);
                         results.push_back(other_hand);
                         results.push_back(right_hand);
                     }
@@ -139,7 +134,7 @@ namespace BlendArMocap
                 // One hand detected.
                 else {
                     std::string hand_headness = headness[0].classification()[0].label();
-                    std::string json = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 20);
+                    std::string json = ParseLandmarks::NormalizedLandmarkListToJson(landmarks[0], 21);
                     if (hand_headness == "Right") {
                         results.push_back("{}");
                         results.push_back(json);
@@ -150,10 +145,10 @@ namespace BlendArMocap
                         results.push_back("{}");
                     }
                 }
-                
                 // Transmitting data.
-                std::string prepared_data = ParseLandmarks::VectorJsonStringToJson(results);
-                client.Send(prepared_data);
+                std::string contents = ParseLandmarks::VectorJsonStringToJson(results);
+                std::string json = ParseLandmarks::AddDescriptor(contents, "HANDS");
+                client.Send(json);
             }
 
             // Poll and render frame.
@@ -200,47 +195,53 @@ namespace BlendArMocap
             // Checking output stream poller results one by one aint pretty,
             // but they are prone to fail when using unique ptrs
             if (pose_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet data_packet;
-                if (!pose_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                results.push_back(ParseLandmarks::NormalizedLandmarkListToJson(
-                    data_packet.Get<mediapipe::NormalizedLandmarkList>(), 33));
+                mediapipe::Packet pose_packet;
+                if (!pose_landmark_poller.Next(&pose_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto pose_landmarks = pose_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto pose_json = ParseLandmarks::NormalizedLandmarkListToJson(pose_landmarks, 33);
+                results.push_back(pose_json);
                 count++;
             }
             else { results.push_back("{}"); }
 
             if (face_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet data_packet;
-                if (!face_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                results.push_back(ParseLandmarks::NormalizedLandmarkListToJson(
-                    data_packet.Get<mediapipe::NormalizedLandmarkList>(), 468));
+                mediapipe::Packet face_packet;
+                if (!face_landmark_poller.Next(&face_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto face_landmarks = face_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto face_json = ParseLandmarks::NormalizedLandmarkListToJson(face_landmarks, 468);
+                results.push_back(face_json);
                 count++;
             }
             else { results.push_back("{}"); }
 
             if (left_hand_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet data_packet;
-                if (!left_hand_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                results.push_back(ParseLandmarks::NormalizedLandmarkListToJson(
-                    data_packet.Get<mediapipe::NormalizedLandmarkList>(), 20));
+                mediapipe::Packet lhand_packet;
+                if (!left_hand_landmark_poller.Next(&lhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto lhand_landmarks = lhand_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto lhand_json = ParseLandmarks::NormalizedLandmarkListToJson(lhand_landmarks, 20);
+                results.push_back(lhand_json);
                 count++;
             }
             else { results.push_back("{}"); }
 
             if (right_hand_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet data_packet;
-                if (!right_hand_landmark_poller.Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                results.push_back(ParseLandmarks::NormalizedLandmarkListToJson(
-                    data_packet.Get<mediapipe::NormalizedLandmarkList>(), 20));
+                mediapipe::Packet rhand_packet;
+                if (!right_hand_landmark_poller.Next(&rhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto rhand_landmarks = rhand_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto rhand_json = ParseLandmarks::NormalizedLandmarkListToJson(rhand_landmarks, 20);
+                results.push_back(rhand_json);
                 count++;
             }
             else { results.push_back("{}"); }
             
             if (count > 0) {
                 // Transmitting if captured something
-                std::string prepared_data = ParseLandmarks::VectorJsonStringToJson(results);
-                client.Send(prepared_data);
+                std::string contents = ParseLandmarks::VectorJsonStringToJson(results);
+                std::string json = ParseLandmarks::AddDescriptor(contents, "HOLISTIC");
+                client.Send(json);
             }
-
+            
+            results.clear();
             mediapipe::Packet frame_packet;
             if (!frame_poller.Next(&frame_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
             RenderMPFrame(frame_packet);

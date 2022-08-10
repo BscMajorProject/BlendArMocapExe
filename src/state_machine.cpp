@@ -36,6 +36,7 @@ namespace BlendArMocap
     void StateMachine::SwitchState()
     {
         absl::Status status;
+        LOG(INFO) << "START State: " << this->current_state << " -> Designated State: " << this->designated_state;
         switch(this->designated_state)
         {
             case IDLE:
@@ -94,6 +95,7 @@ namespace BlendArMocap
             break;
         }
 
+        LOG(INFO) << "PRESWITCHCurrent State: " << this->current_state << " -> Designated State: " << this->designated_state;
         switch (current_state){
             case FINISH:
             {  }
@@ -108,7 +110,11 @@ namespace BlendArMocap
                     if (this->current_state != IDLE) { SetState(IDLE); }
                     else { LOG(ERROR) << "Application failed in IDLE state."; }
                 }
-                else { SetState(this->designated_state); }
+                else 
+                { 
+                    LOG(INFO) << "REGULAR SWITCH";
+                    SetState(this->designated_state); 
+                }
             }
             break;
         }
