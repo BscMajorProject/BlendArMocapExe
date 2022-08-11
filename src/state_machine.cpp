@@ -146,7 +146,7 @@ namespace BlendArMocap
                 gArr[row][col] = 0;
             }
         }
-        cv::Mat image = cv::Mat(rows, cols, CV_8U, &gArr);
+        cv::Mat image = cv::Mat(rows, cols, CV_8U, gArr);
         cv::cvtColor(image, image, cv::COLOR_BGR2RGBA);
         return image;
     }

@@ -194,12 +194,22 @@ namespace BlendArMocap
             
             // Checking output stream poller results one by one aint pretty,
             // but they are prone to fail when using unique ptrs
-            if (pose_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet pose_packet;
-                if (!pose_landmark_poller.Next(&pose_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                auto pose_landmarks = pose_packet.Get<mediapipe::NormalizedLandmarkList>();
-                auto pose_json = ParseLandmarks::NormalizedLandmarkListToJson(pose_landmarks, 33);
-                results.push_back(pose_json);
+            if (left_hand_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet lhand_packet;
+                if (!left_hand_landmark_poller.Next(&lhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto lhand_landmarks = lhand_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto lhand_json = ParseLandmarks::NormalizedLandmarkListToJson(lhand_landmarks, 21);
+                results.push_back(lhand_json);
+                count++;
+            }
+            else { results.push_back("{}"); }
+
+            if (right_hand_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet rhand_packet;
+                if (!right_hand_landmark_poller.Next(&rhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto rhand_landmarks = rhand_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto rhand_json = ParseLandmarks::NormalizedLandmarkListToJson(rhand_landmarks, 21);
+                results.push_back(rhand_json);
                 count++;
             }
             else { results.push_back("{}"); }
@@ -213,23 +223,13 @@ namespace BlendArMocap
                 count++;
             }
             else { results.push_back("{}"); }
-
-            if (left_hand_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet lhand_packet;
-                if (!left_hand_landmark_poller.Next(&lhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                auto lhand_landmarks = lhand_packet.Get<mediapipe::NormalizedLandmarkList>();
-                auto lhand_json = ParseLandmarks::NormalizedLandmarkListToJson(lhand_landmarks, 20);
-                results.push_back(lhand_json);
-                count++;
-            }
-            else { results.push_back("{}"); }
-
-            if (right_hand_landmark_poller.QueueSize() > 0 ){
-                mediapipe::Packet rhand_packet;
-                if (!right_hand_landmark_poller.Next(&rhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                auto rhand_landmarks = rhand_packet.Get<mediapipe::NormalizedLandmarkList>();
-                auto rhand_json = ParseLandmarks::NormalizedLandmarkListToJson(rhand_landmarks, 20);
-                results.push_back(rhand_json);
+            
+            if (pose_landmark_poller.QueueSize() > 0 ){
+                mediapipe::Packet pose_packet;
+                if (!pose_landmark_poller.Next(&pose_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+                auto pose_landmarks = pose_packet.Get<mediapipe::NormalizedLandmarkList>();
+                auto pose_json = ParseLandmarks::NormalizedLandmarkListToJson(pose_landmarks, 33);
+                results.push_back(pose_json);
                 count++;
             }
             else { results.push_back("{}"); }

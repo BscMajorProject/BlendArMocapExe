@@ -8,6 +8,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -59,10 +60,9 @@ GLFWwindow* IntializeWindow(int width, int height, char *label){
     // Create window with graphics context
     GLFWwindow* window = glfwCreateWindow(width, height, label, nullptr, nullptr );
     glfwMakeContextCurrent(window);
-    // Enable vsync
-    glfwSwapInterval(1);
-    // Initialize simple OpenGL core profile loading
-    gl3wInit();
+    glfwSwapInterval(1); // Enable vsync
+    // TODO: CHECK GL3W
+    gl3wInit(); // Initialize simple OpenGL core profile loading
     
     // Setup imgui context
     IMGUI_CHECKVERSION();
@@ -104,30 +104,33 @@ GLuint OnBeforeRender(cv::Mat image)
     // Poll and handle events (inputs, window resize, etc.)
     glfwPollEvents();
 
-    // Clear gl buffer
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Generate and bind gl textures
+    // Create a OpenGL texture identifier
     GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+//     glGenTextures(1, &texture);
+//     glBindTexture(GL_TEXTURE_2D, texture);
+//     // Setup filtering parameters for display
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+// 
+//     // Upload pixels into texture
+// #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+//     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+// #endif
+//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+    image.release();
     return texture;
 }
 
-void OnExitGUI(){
+void OnExitGUI(GLFWwindow* window){
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
+    glfwDestroyWindow(window); // TODO: SHOULD DEST WINDOW
     glfwTerminate();
 }
 
@@ -152,27 +155,35 @@ int main( int argc, char* argv[] )
     while(!glfwWindowShouldClose(window)){
 
         //getting viewport
+        // this shit takes up tons of resources
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         int width = viewport->WorkSize.x;
         int height = (width/16)*9;
-        cv::Mat dst;
-        if (width > 480){
-            cv::resize(image, dst, cv::Size(width, height));
-        }
-        else{
-            dst = image;
-        }
+        cv::Mat dst = image;
+        // if (width > 480){
+        //     cv::resize(image, dst, cv::Size(width, height));
+        // }
+        // else{
+        //     dst = image;
+        // }
         // cv::Size size (int(viewport->Size.x), int(viewport->Size.y)));
         // cv::resize(frame, dst, size);
 
         GLuint texture = OnBeforeRender(dst);
         DrawGUI(texture, dst);
 
+        // rendering
         ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        // Clear gl buffer
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
 
-    OnExitGUI();
+    OnExitGUI(window);
     return 0;
 }

@@ -4,6 +4,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <GL/gl3w.h>
+#include "callbacks.h"
 #include "interface.h"
 #include <GLFW/glfw3.h>
 #include "glog/logging.h"
@@ -34,6 +35,26 @@ namespace BlendArMocapGUI
         return image;
     }
 
+    void SetGUIStyle(){
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImVec4* colors = style.Colors;
+        style.WindowRounding = 0.0f;
+        style.FrameRounding = 2.0f;
+        style.ScrollbarRounding = 0;
+
+        colors[ImGuiCol_Text]                   = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+        colors[ImGuiCol_TextDisabled]           = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+        colors[ImGuiCol_WindowBg]               = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+        colors[ImGuiCol_FrameBg]                = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+        colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.7f, 0.7f, 0.7f, 1.0f);
+        colors[ImGuiCol_FrameBgActive]          = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+        colors[ImGuiCol_TitleBgActive]          = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+        colors[ImGuiCol_CheckMark]              = ImVec4(0.2f, 0.6f, 1.0f, 1.0f);
+        colors[ImGuiCol_Button]                 = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+        colors[ImGuiCol_Header]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+        colors[ImGuiCol_HeaderHovered]          = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+        colors[ImGuiCol_Header]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+    }
 
     GLFWwindow* IntializeWindow(int width, int height, char *label){
         glfwSetErrorCallback(glfw_error_callback);
@@ -62,7 +83,7 @@ namespace BlendArMocapGUI
     #endif
 
         // Create window with graphics context
-        GLFWwindow* window = glfwCreateWindow(width, height, label, nullptr, nullptr );
+        GLFWwindow *window = glfwCreateWindow(width, height, label, nullptr, nullptr );
         glfwMakeContextCurrent(window);
         // Enable vsync
         glfwSwapInterval(1);
@@ -72,33 +93,19 @@ namespace BlendArMocapGUI
         // Setup imgui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
+        //ImGui::StyleColorsDark();
+        ImGui::StyleColorsLight();
+        // SetGUIStyle();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
-        //ImGui_ImplOpenGL3_Init( "#version 330" );
-
-        // TODO: Load fonts
-        // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-        // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-        // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-        // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-        // - Read 'docs/FONTS.md' for more instructions and details.
-        // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-        //io.Fonts->AddFontDefault();
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-        //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-        //IM_ASSERT(font != NULL);
         
-        //ImFont* font = io.Fonts->AddFontFromFileTTF();
+        // Set default font
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.Fonts->AddFontFromFileTTF("src/gui/resources/Roboto-Medium.ttf", 14.0f);
         return window;
     }
     
@@ -122,10 +129,16 @@ namespace BlendArMocapGUI
         // Generate and bind gl textures
         GLuint texture;
         glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        if (Callback::instance()->toggled_detection)
+        {
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif    
+        }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
         return texture;
     }
@@ -139,7 +152,7 @@ namespace BlendArMocapGUI
 
     void DrawGUI(GLuint texture, cv::Mat image){
         // Render panel without title bar, collapse and resize option.
-        const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        // const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
         static ImGuiWindowFlags flags = 
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoTitleBar |
@@ -152,18 +165,23 @@ namespace BlendArMocapGUI
         
         ImGui::Begin("InvisibleHeader", pOpen, flags); 
         // https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-how-can-i-display-an-image-what-is-imtextureid-how-does-it-work
+        ImGui::Spacing();
+
+        int px = (ImGui::GetWindowWidth() - image.cols) * .5f;
+        ImGui::SetCursorPos(ImVec2(px, 0));
         ImGui::Image( reinterpret_cast<void*>( static_cast<intptr_t>(texture)), ImVec2(image.cols, image.rows));
         DrawInterface();
         ImGui::End();
     }
 
     cv::Mat ResizeImage(cv::Mat image){
+        // adds way to much cpu load using glfw + cpu
         const ImGuiViewport* viewport = ImGui::GetMainViewport();
         int width = viewport->WorkSize.x;
         int height = (width/4)*3;
         cv::Mat dst;
         if (width > 50){
-            cv::resize(image, dst, cv::Size(width, height));
+            cv::resize(image, dst, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
         }
         else{
             dst = image;
@@ -171,8 +189,8 @@ namespace BlendArMocapGUI
         return dst;
     }
 
-    void Render(cv::Mat frame, GLFWwindow* window){
-        cv::Mat image = ResizeImage(frame);
+    void Render(cv::Mat image, GLFWwindow* window){
+        // cv::Mat image = ResizeImage(frame);
         // cv::Mat image = frame;
         GLuint texture = BlendArMocapGUI::OnBeforeRender(image);
         BlendArMocapGUI::DrawGUI(texture, image);

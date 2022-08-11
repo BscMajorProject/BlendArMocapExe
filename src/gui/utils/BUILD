@@ -7,6 +7,7 @@ cc_binary(
         "@glfw_linux//:glfw",
         "@gles_linux//:gles",    
         "@opengl_linux//:gl",
+        "@stblib//:stb_image",
         ],
 )
 

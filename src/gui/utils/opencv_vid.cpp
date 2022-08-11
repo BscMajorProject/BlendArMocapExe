@@ -119,7 +119,11 @@ GLuint OnBeforeRender(cv::Mat image)
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // // minimal better (3-4%)
+
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
     return texture;
 }
@@ -158,6 +162,8 @@ int main(int argc, char* argv[]){
     GLFWwindow* window = IntializeWindow(800, 600, "glfw");
     // run loop
     while(!glfwWindowShouldClose(window)){
+
+        const ImGuiViewport *viewport = ImGui::GetMainViewport();
         // get frame mat
         cv::Mat frame;
         cap >> frame;
@@ -170,7 +176,6 @@ int main(int argc, char* argv[]){
         cv::flip(frame, tmp, 1);
 
         //getting viewport
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
         int width = viewport->WorkSize.x;
         int height = (width/16)*9;
         cv::Mat dst;
@@ -186,7 +191,6 @@ int main(int argc, char* argv[]){
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
-
     }
 
     cap.release();

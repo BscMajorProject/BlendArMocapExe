@@ -13,6 +13,7 @@ namespace BlendArMocapGUI{
     void DrawGUI(GLuint texture, cv::Mat image);
     void OnExitGUI();
     void Render(cv::Mat frame, GLFWwindow* window);
+    void SetGUIStyle();
 }
 
 #endif
