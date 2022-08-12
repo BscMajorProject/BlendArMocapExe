@@ -56,6 +56,8 @@ namespace BlendArMocapGUI
         colors[ImGuiCol_Header]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
     }
 
+
+
     GLFWwindow* IntializeWindow(int width, int height, char *label){
         glfwSetErrorCallback(glfw_error_callback);
 
@@ -156,6 +158,7 @@ namespace BlendArMocapGUI
         static ImGuiWindowFlags flags = 
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
             ImGuiWindowFlags_NoResize;
 
         // Ensure panel is always filling the viewport.

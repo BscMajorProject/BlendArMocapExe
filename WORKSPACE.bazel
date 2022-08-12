@@ -5,10 +5,6 @@ local_repository(
     path="/home/denysh/Documents/development/cpp/mediapipe"
 )
 
-# local_repository(
-#     name = "dearimgui",
-#     path = "third_party/imgui/",
-# )
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 new_git_repository(
@@ -18,11 +14,9 @@ new_git_repository(
     build_file = "@//third_party:imgui.BUILD",
 )
 
-new_git_repository(
-    name = "imgui_filebrowser",
-    remote = "https://github.com/AirGuanZ/imgui-filebrowser",
-    branch="master",
-    build_file = "@//third_party:imgui_filebrowser.BUILD",
+local_repository(
+    name = "imguifilediaglog",
+    path="third_party/ImGuiFileDialog-Lib_Only/",
 )
 
 

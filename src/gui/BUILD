@@ -28,7 +28,7 @@ cc_library(
     ],
     deps = [
         "@imgui//:imgui_glfw",
-        "@imgui_filebrowser//:imgui_filebrowser",
+        "@imguifilediaglog//:ImGuiFileDialog",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",

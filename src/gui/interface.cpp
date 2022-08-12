@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "interface.h"
 #include "callbacks.h"
-
+#include "ImGuiFileDialog.h"
 
 // Helper to wire demo markers located in code to a interactive browser
 typedef void (*ImGuiDemoMarkerCallback)(const char* file, int line, const char* section, void* user_data);
@@ -88,10 +88,31 @@ namespace BlendArMocapGUI
         if (i0 < 0 || i0 > 3) { i0 = 0; }
         OnConfigWebcamDeviceSlot(&i0);
 
-        static char str1[128] = "";
-        ImGui::InputTextWithHint("Movie Path", "Paste Path to Movie", str1, IM_ARRAYSIZE(str1));
+        static char str1[1024] = "";
+        ImGui::InputTextWithHint("Movie Path", "Path to Movie file...", str1, IM_ARRAYSIZE(str1));
         OnConfigMoviePath(str1);
 
+        // open Dialog Simple
+        if (ImGui::Button("Open File Dialog"))
+          ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".mp4,.mov,.*", ".");
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(viewport->Size);
+        // display
+        if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) 
+        {
+         // action if OK
+         if (ImGuiFileDialog::Instance()->IsOk())
+         {
+           std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+           // std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+           // action
+           strcpy(str1, filePathName.c_str());
+         }
+         
+         // close
+         ImGuiFileDialog::Instance()->Close();
+        }
         ImGui::Spacing();
     }
 
