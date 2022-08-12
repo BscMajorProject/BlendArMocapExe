@@ -20,10 +20,6 @@ namespace BlendArMocap
         if (this->is_detecting != BlendArMocapGUI::Callback::instance()->toggled_detection){
             LOG(INFO) << "User toggled detection";
             int detection_type = BlendArMocapGUI::Callback::instance()->detection_type;
-            int input_type = BlendArMocapGUI::Callback::instance()->input_type;
-            int webcam_slot = BlendArMocapGUI::Callback::instance()->webcam_slot;
-            char *movie_path = BlendArMocapGUI::Callback::instance()->movie_path;
-
             this->designated_state = static_cast<State>(detection_type);
             this->is_detecting = BlendArMocapGUI::Callback::instance()->toggled_detection;
             return true;
@@ -36,7 +32,6 @@ namespace BlendArMocap
     void StateMachine::SwitchState()
     {
         absl::Status status;
-        LOG(INFO) << "START State: " << this->current_state << " -> Designated State: " << this->designated_state;
         switch(this->designated_state)
         {
             case IDLE:
@@ -49,40 +44,32 @@ namespace BlendArMocap
             case HAND:
             {
                 LOG(INFO) << "HAND DETECTION";
-                this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
                 this->output_data = "hand_landmarks";
                 status = HandDetection();
-                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
             case FACE:
             {
                 LOG(INFO) << "FACE DETECTION";
-                this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
                 this->output_data = "multi_face_landmarks";
                 status = RunDetection();
-                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
             case POSE:
             {
                 LOG(INFO) << "POSE DETECTION";
-                this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
                 this->output_data = "pose_landmarks";
                 status = RunDetection();
-                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
             case HOLISTIC:
             {
                 LOG(INFO) << "HOLISTIC DETECTION";
-                this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
-                this->output_data = ""; // custom method
+                // Custom output data.
                 status = HolisticDetection();
-                if (!status.ok()) { LOG(ERROR) << status; SetState(IDLE); }
             }
             break;
 
@@ -95,7 +82,6 @@ namespace BlendArMocap
             break;
         }
 
-        LOG(INFO) << "PRESWITCHCurrent State: " << this->current_state << " -> Designated State: " << this->designated_state;
         switch (current_state){
             case FINISH:
             {  }
@@ -103,16 +89,15 @@ namespace BlendArMocap
 
             default:
             {
-                LOG(INFO) << "Switching to new State.";
                 if (!status.ok()) 
                 { 
                     LOG(ERROR) << status; 
+                    BlendArMocapGUI::Callback::instance()->toggled_detection = false;
+                    this->is_detecting = false;
                     if (this->current_state != IDLE) { SetState(IDLE); }
-                    else { LOG(ERROR) << "Application failed in IDLE state."; }
                 }
                 else 
                 { 
-                    LOG(INFO) << "REGULAR SWITCH";
                     SetState(this->designated_state); 
                 }
             }
@@ -123,7 +108,7 @@ namespace BlendArMocap
 
     void StateMachine::SetState(State _state)
     {
-        LOG(INFO) << "Current State: " << this->current_state << " -> Designated State: " << _state;
+        LOG(INFO) << "Setting State: " << this->current_state << " -> " << _state;
         if (_state != this->current_state) 
         {
             this->current_state = _state;

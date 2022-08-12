@@ -3,7 +3,7 @@ cc_binary(
     name = "demo",
     srcs = ["demo.cpp"],
     deps = [
-        "@dearimgui//:imgui_glfw",
+        "@imgui//:imgui_glfw",
         "@glfw_linux//:glfw",
         "@gles_linux//:gles",
     ],
@@ -27,7 +27,8 @@ cc_library(
         "callbacks.h",
     ],
     deps = [
-        "@dearimgui//:imgui_glfw",
+        "@imgui//:imgui_glfw",
+        "@imgui_filebrowser//:imgui_filebrowser",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",

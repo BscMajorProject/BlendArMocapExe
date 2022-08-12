@@ -9,8 +9,8 @@
 #include "utils/parse_landmarks.h"
 #include "mediapipe/framework/formats/classification.pb.h"
 #include "socket/client.h"
-
 #include "mp/cgt_cpu_graph.h"
+
 namespace BlendArMocap
 {
     class StateMachine {

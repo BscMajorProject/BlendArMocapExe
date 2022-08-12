@@ -1,5 +1,11 @@
 #include "state_machine.h"
 
+/*
+    TODO: Refactor this script properly.
+    Currently output stream pollers may not be referenced using unique_ptrs 
+    via std::move. This leads to duplicated code.
+    Custom scopes seem to deliever the most stable restults.
+*/
 
 namespace BlendArMocap 
 {
@@ -27,14 +33,17 @@ namespace BlendArMocap
     absl::Status StateMachine::RunDetection()
     {
         // Initializing the graph.
-        CPUGraph cpu_graph(this->config_file_path);
+        CPUGraph cpu_graph = CPUGraph(
+            BlendArMocapGUI::Callback::instance()->detection_type, 
+            BlendArMocapGUI::Callback::instance()->input_type, 
+            BlendArMocapGUI::Callback::instance()->webcam_slot, 
+            BlendArMocapGUI::Callback::instance()->movie_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         
         // Assigning pollers and start running.
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller frame_poller, cpu_graph.graph.AddOutputStreamPoller("output_video"));
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
-        LOG(INFO) << "Start running graph";
 
         Client client = Client();
         while (this->is_detecting) {
@@ -85,7 +94,11 @@ namespace BlendArMocap
     absl::Status StateMachine::HandDetection()
     {
         // Initializing the graph.
-        CPUGraph cpu_graph(this->config_file_path);
+        CPUGraph cpu_graph = CPUGraph(
+            BlendArMocapGUI::Callback::instance()->detection_type, 
+            BlendArMocapGUI::Callback::instance()->input_type, 
+            BlendArMocapGUI::Callback::instance()->webcam_slot, 
+            BlendArMocapGUI::Callback::instance()->movie_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         
         // Assigning pollers and start running.
@@ -93,7 +106,6 @@ namespace BlendArMocap
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller landmark_poller, cpu_graph.graph.AddOutputStreamPoller(this->output_data));
         ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller headness_poller, cpu_graph.graph.AddOutputStreamPoller("handedness"));
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
-        LOG(INFO) << "Start running graph";
         
         // Initialize Client.
         Client client = Client();
@@ -169,7 +181,12 @@ namespace BlendArMocap
     // Face landmarks: 468
     absl::Status StateMachine::HolisticDetection()
     {
-        CPUGraph cpu_graph(this->config_file_path);
+        // Initializing the graph.
+        CPUGraph cpu_graph = CPUGraph(
+            BlendArMocapGUI::Callback::instance()->detection_type, 
+            BlendArMocapGUI::Callback::instance()->input_type, 
+            BlendArMocapGUI::Callback::instance()->webcam_slot, 
+            BlendArMocapGUI::Callback::instance()->movie_path);
         if (!cpu_graph.Init().ok()) { return absl::AbortedError("Init failed"); }
         
         // Assign Pollers.
@@ -181,7 +198,6 @@ namespace BlendArMocap
 
         // Start running.
         MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
-        LOG(INFO) << "Start running graph";
         Client client = Client();
 
         // Vector to store detection results.
@@ -192,8 +208,6 @@ namespace BlendArMocap
             absl::Status graph_update_status = cpu_graph.Update();
             if (!graph_update_status.ok()) { LOG(ERROR) << "Updating graph failed: " << graph_update_status; break; } 
             
-            // Checking output stream poller results one by one aint pretty,
-            // but they are prone to fail when using unique ptrs
             if (left_hand_landmark_poller.QueueSize() > 0 ){
                 mediapipe::Packet lhand_packet;
                 if (!left_hand_landmark_poller.Next(&lhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }

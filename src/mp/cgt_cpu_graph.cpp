@@ -3,27 +3,64 @@
 
 namespace BlendArMocap
 {
-    // TODO: Add video input
-    CPUGraph::CPUGraph(std::string config_file_path)
+    CPUGraph::CPUGraph(std::string config_file_path, bool debug)
     {
         this->config_file_path = config_file_path;
-        this->isVideo = false;
+        this->webcam_slot = 0;
+        this->is_video = false;
+        this->movie_path = "";
+        this->debug = debug;
+    }
+
+    CPUGraph::CPUGraph(int detection_type, int input_type, int webcam_slot, char *movie_path)
+    {
+        // HAND=0, FACE=1, POSE=2, HOLISTIC=3,
+        if (detection_type == 0) {
+            this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
+        }
+        else if (detection_type == 1) {
+            this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
+        }
+        else if (detection_type == 2) {
+            this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
+        }
+        else {
+            this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
+        }
+        if (input_type == 1) { this->is_video = true; }
+        else { this->is_video = false; }
+        this->webcam_slot = webcam_slot;
+        this->movie_path = movie_path;
         this->debug = false;
     }
 
-    absl::Status CPUGraph::Init(){
-        // Init Graph Calculator.
-        absl::Status graph_status = InitGraph();
-        if (!graph_status.ok()) { return graph_status; }
+    CPUGraph::CPUGraph(const CPUGraph &other){
+        this->webcam_slot = other.webcam_slot;
+        this->is_video = other.is_video;
+        this->debug = other.debug;
+        this->movie_path = other.movie_path;
+        this->config_file_path = other.config_file_path;
+    }
 
+    absl::Status CPUGraph::Init(){
+        // Parse config file.
+        std::string calculator_graph_config_contents;
+        absl::Status paresed_contents = mediapipe::file::GetContents(this->config_file_path, &calculator_graph_config_contents);
+        if (!paresed_contents.ok()) { return absl::InternalError( "Failed to read configuration file." ); }
+
+        // Create graph config.
+        mediapipe::CalculatorGraphConfig graph_config = mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(
+            calculator_graph_config_contents);
+        
         // Init OpenCV capture.
         absl::Status capture_status = InitCapture();
         if (!capture_status.ok()) { return capture_status; }
-        LOG(INFO) << "Graph initialized.";
 
+        // Init graph.
+        if (!this->graph.Initialize(graph_config).ok()) { return absl::InternalError("Failed to initialize Graph."); }
         return absl::OkStatus();
     }
-
+    
     absl::Status CPUGraph::Update(){
         // Capture camera or video frame.
         absl::StatusOr<cv::Mat> frame_status = GetCVFrame();
@@ -38,41 +75,45 @@ namespace BlendArMocap
         return absl::OkStatus();
     }
 
-    absl::Status CPUGraph::InitGraph(){
-        // Read calulator graph configuration file.
-        std::string calculator_graph_config_contents;
-        absl::Status paresed_contents = mediapipe::file::GetContents(this->config_file_path, &calculator_graph_config_contents);
-        if (!paresed_contents.ok()) { return absl::InternalError( "Failed to read configuration file." ); }
-
-        // Parse the protobuffer configuration contents.
-        LOG(INFO) << "Getting calculator graph config contents.";
-        mediapipe::CalculatorGraphConfig config = mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(calculator_graph_config_contents);
-
-        // Initialize the graph.
-        if (!this->graph.Initialize(config).ok()) { return absl::InternalError("Failed to initialize Graph."); }
-        return absl::OkStatus();
-    }
-
     absl::Status CPUGraph::InitCapture(){
         LOG(INFO) << "Initialize the camera or load the video.";
-        if (this->isVideo)
+        if (this->is_video)
         {
-            this->capture.open(movie_path);
+            LOG(INFO) << "Movie Path: " << this->movie_path;
+            try {
+                this->capture.open(this->movie_path);
+            }
+            catch (cv::Exception &e) {
+                const char* err_msg = e.what();
+                return absl::AbortedError(err_msg);
+            }
         }
+
         else {
-            this->capture.open(0);
+            LOG(INFO) << "Webcam slot: " << this->webcam_slot;
+            try {
+                this->capture.open(this->webcam_slot);
+
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 2)
-            this->capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
-            this->capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-            this->capture.set(cv::CAP_PROP_FPS, 30);
+                this->capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+                this->capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+                this->capture.set(cv::CAP_PROP_FPS, 30);
 #endif
+            }
+
+            catch (cv::Exception &e) {
+                const char* err_msg = e.what();
+                return absl::AbortedError(err_msg);
+            }
         }
         
         if (this->debug)
         {
+            LOG(INFO) << "Generating debug window";
             cv::namedWindow(this->window_name, /*flags=WINDOW_AUTOSIZE*/ 1);
         }
-
+        
+        LOG(INFO) << "Checking";
         RET_CHECK(this->capture.isOpened());
         return absl::OkStatus();
     }

@@ -21,34 +21,36 @@ namespace BlendArMocap
 {
     class CPUGraph {
     public:
-        CPUGraph(std::string config_path);
-        CPUGraph& operator=(const CPUGraph&) = default;
-        CPUGraph(CPUGraph&&) = default;
-        CPUGraph& operator=(CPUGraph&&) = default;
+        CPUGraph(std::string config_file_path, bool debug);
+        CPUGraph(int detection_type, int input_type, int webcam_slot, char *movie_path);
+        CPUGraph(const CPUGraph &other);
 
         absl::Status Update();
 
         absl::Status Init();
-        absl::Status InitGraph();
         absl::Status InitCapture();
         absl::StatusOr<cv::Mat> GetCVFrame();
         absl::Status CreateUniqueMPFrame(cv::Mat *camera_frame);
         absl::Status CloseGraph();
         absl::Status RenderFrame(cv::Mat ouput_frame_mat);
+        
         cv::Mat output_frame_mat;
-
         mediapipe::CalculatorGraph graph;
+    
     private:
         std::string config_file_path;
+        mediapipe::CalculatorGraphConfig graph_config;
         cv::VideoCapture capture;
 
+        
         // OpenCV Rendering for debugging purposes.
         bool debug;
         char window_name[24] = "TestingGraph";
 
         // Input stream name and path to movie file.
-        bool isVideo;
-        char movie_path[1024] = "";
+        bool is_video;
+        int webcam_slot = 0;
+        char *movie_path;
         char input_stream[24] = "input_video";
 
         // Detection results.

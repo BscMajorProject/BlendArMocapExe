@@ -84,6 +84,8 @@ namespace BlendArMocapGUI
 
         static int i0 = 0;
         ImGui::InputInt("Webcam Device Slot", &i0);
+
+        if (i0 < 0 || i0 > 3) { i0 = 0; }
         OnConfigWebcamDeviceSlot(&i0);
 
         static char str1[128] = "";
