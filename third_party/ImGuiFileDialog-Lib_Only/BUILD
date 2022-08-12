@@ -6,7 +6,7 @@ cc_library(
         "*.cpp",
     ]),
     hdrs = glob([
-        "stb/*.h",
+        # "stb/*.h",
         "dirent/*.h",
         "*.h",
     ]),

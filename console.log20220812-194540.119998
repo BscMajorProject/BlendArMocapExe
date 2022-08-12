@@ -1,0 +1,9 @@
+Log file created at: 2022/08/12 19:45:40
+Running on machine: denys-systemproductname
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220812 19:45:40.310863 119998 main.cpp:12] Initialized BlendArMocap
+I20220812 19:45:41.250782 119998 state_machine.cpp:111] Setting State: 5 -> 6
+I20220812 19:45:41.250797 119998 state_machine.cpp:39] IDLE
+I20220812 19:46:00.194823 119998 state_machine.cpp:111] Setting State: 6 -> 7
+I20220812 19:46:00.194854 119998 state_machine.cpp:77] Application terminated.
+I20220812 19:46:00.510084 119998 main.cpp:18] Shutdown

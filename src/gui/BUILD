@@ -33,6 +33,7 @@ cc_library(
         "@linux_opencv//:opencv",
         "@gles_linux//:gles",
         "@opengl_linux//:gl",
+        "@stblib//:stb_image",
         "//src:absl",
     ],
     copts = [

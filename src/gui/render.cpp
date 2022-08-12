@@ -8,6 +8,7 @@
 #include "interface.h"
 #include <GLFW/glfw3.h>
 #include "glog/logging.h"
+#include "stb_image.h"
 
 
 namespace BlendArMocapGUI
@@ -50,7 +51,7 @@ namespace BlendArMocapGUI
         colors[ImGuiCol_FrameBgActive]          = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
         colors[ImGuiCol_TitleBgActive]          = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
         colors[ImGuiCol_CheckMark]              = ImVec4(0.2f, 0.6f, 1.0f, 1.0f);
-        colors[ImGuiCol_Button]                 = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+        colors[ImGuiCol_Button]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
         colors[ImGuiCol_Header]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
         colors[ImGuiCol_HeaderHovered]          = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
         colors[ImGuiCol_Header]                 = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -60,7 +61,6 @@ namespace BlendArMocapGUI
 
     GLFWwindow* IntializeWindow(int width, int height, char *label){
         glfwSetErrorCallback(glfw_error_callback);
-
         // Decide GL+GLSL versions
     #if defined(IMGUI_IMPL_OPENGL_ES2)
         // GL ES 2.0 + GLSL 100
@@ -98,16 +98,31 @@ namespace BlendArMocapGUI
 
         // Setup Dear ImGui style
         //ImGui::StyleColorsDark();
-        ImGui::StyleColorsLight();
-        // SetGUIStyle();
+        //ImGui::StyleColorsLight();
+        SetGUIStyle();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
-        
+                
         // Set default font
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.Fonts->AddFontFromFileTTF("src/gui/resources/Roboto-Medium.ttf", 14.0f);
+
+        // load image file
+        int w, h;
+        int channels;
+        unsigned char* pixels = stbi_load("src/gui/resources/check.png", &w, &h, &channels, 4);
+
+        // Set window icon
+        GLFWimage images[1];
+        images[0].width = w;
+        images[0].height = h;
+        images[0].pixels = pixels;
+
+        glfwSetWindowIcon(window, 1, images);
+
+        //glfwSetWindowIcon()
         return window;
     }
     
