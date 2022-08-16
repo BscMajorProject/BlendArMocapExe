@@ -1,6 +1,7 @@
 #include "mediapipe/framework/formats/landmark.pb.h"
 #include "absl/status/status.h"
 #include "glog/logging.h"
+#include "cstdint"
 
 
 namespace ParseLandmarks
@@ -34,10 +35,10 @@ namespace ParseLandmarks
         return os.str();
     }
 
-    std::string AddDescriptor(std::string contents, std::string descriptor){
+    std::string AddDescriptor(std::string contents, std::string descriptor, int64_t frame){
         std::ostringstream os;
         os << "{";
-        os << "\"" << descriptor << "\": " << contents;
+        os << "\"" << descriptor << "\": " << contents << ", \"frame\"" << frame;
         os << "}";
         return os.str();
     }

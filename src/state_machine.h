@@ -30,16 +30,13 @@ namespace BlendArMocap
         void SwitchState();
         cv::Mat RawTexture();
         bool GUICallback();
-        bool OnGUIInteraction();
-        void RenderMPFrame(mediapipe::Packet frame_packet);
-        
+
     private:
         char *config_file_path;
-        char *output_data;
-        absl::Status RunDetection();
-        absl::Status HolisticDetection();
-        absl::Status HandDetection();
+        absl::Status RunDetectionGraph();
         absl::Status Idel();
+        bool OnGUIInteraction();
+        int64 Frame(mediapipe::Timestamp *first_stamp, mediapipe::Timestamp timestamp);
     };
 }
 

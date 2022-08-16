@@ -1,4 +1,0 @@
-Log file created at: 2022/08/12 19:56:26
-Running on machine: denys-systemproductname
-Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I20220812 19:56:26.840725 124490 main.cpp:12] Initialized BlendArMocap

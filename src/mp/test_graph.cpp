@@ -22,6 +22,7 @@ absl::Status test(){
     MP_RETURN_IF_ERROR(cpu_graph.graph.StartRun({}));
     LOG(INFO) << "Start running graph";
 
+    mediapipe::Timestamp first_stamp = mediapipe::Timestamp::Unset();
     int i = 0;
     while (i < 75) {
         i += 1;
@@ -32,11 +33,21 @@ absl::Status test(){
         if (landmark_poller.QueueSize() > 0 ){
             mediapipe::Packet data_packet;
             if (!landmark_poller.Next(&data_packet)) { return absl::InternalError("Receiving poller packet failed."); }
+            if (first_stamp == mediapipe::Timestamp::Unset()) {
+                first_stamp = data_packet.Timestamp();
+            }
+            else {
+                auto f = first_stamp.Value();
+                auto c = data_packet.Timestamp().Value();
+                int64 frame = (c-f)/33333; // Timestamps are in microseconds. kTimestampUnitsPerSecond = 1000000.0;
+                LOG(INFO) << frame;
+            }
             auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
             LOG(INFO) << "successfully pulled landmarks";
         }
 
         mediapipe::Packet frame_packet;
+
         if (!frame_poller.Next(&frame_packet)) { return absl::InternalError("Receiving poller packet failed."); }
         auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);

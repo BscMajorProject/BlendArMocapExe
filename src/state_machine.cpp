@@ -44,47 +44,47 @@ namespace BlendArMocap
             case HAND:
             {
                 LOG(INFO) << "HAND DETECTION";
-                this->output_data = "hand_landmarks";
-                status = HandDetection();
+                status = RunDetectionGraph();
             }
             break;
 
             case FACE:
             {
                 LOG(INFO) << "FACE DETECTION";
-                this->output_data = "multi_face_landmarks";
-                status = RunDetection();
+                status = RunDetectionGraph();
             }
             break;
 
             case POSE:
             {
                 LOG(INFO) << "POSE DETECTION";
-                this->output_data = "pose_landmarks";
-                status = RunDetection();
+                status = RunDetectionGraph();
             }
             break;
 
             case HOLISTIC:
             {
                 LOG(INFO) << "HOLISTIC DETECTION";
-                // Custom output data.
-                status = HolisticDetection();
+                status = RunDetectionGraph();
             }
             break;
 
             case FINISH:
-            { LOG(INFO) << "Application terminated."; }
+            { 
+                LOG(INFO) << "Application terminated."; 
+            }
             break;
 
             default:
-            { LOG(ERROR) << "State machine failed"; }
+            { 
+                LOG(ERROR) << "State machine failed"; 
+            }
             break;
         }
 
         switch (current_state){
             case FINISH:
-            {  }
+            { }
             break;
 
             default:
@@ -108,7 +108,6 @@ namespace BlendArMocap
 
     void StateMachine::SetState(State _state)
     {
-        LOG(INFO) << "Setting State: " << this->current_state << " -> " << _state;
         if (_state != this->current_state) 
         {
             this->current_state = _state;
