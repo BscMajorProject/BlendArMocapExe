@@ -5,9 +5,9 @@
 
 
 int main(int argc, char* argv[]){
+    // google::LogToStderr();
+    google::SetLogDestination(0, "console.log"); 
     google::InitGoogleLogging(argv[0]);
-    google::LogToStderr();
-    //google::SetLogDestination(0, "console.log"); 
     if( !glfwInit() ) { return -1; }
     LOG(INFO) << "Initialized BlendArMocap";
     

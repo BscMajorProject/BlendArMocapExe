@@ -112,7 +112,7 @@ namespace BlendArMocapGUI
         // load image file
         int w, h;
         int channels;
-        unsigned char* pixels = stbi_load("src/gui/resources/check.png", &w, &h, &channels, 4);
+        unsigned char* pixels = stbi_load("src/gui/resources/icon.png", &w, &h, &channels, 4);
 
         // Set window icon
         GLFWimage images[1];

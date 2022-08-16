@@ -187,6 +187,7 @@ namespace BlendArMocap
                         // Transmitting data.
                         std::string contents = ParseLandmarks::VectorJsonStringToJson(results);
                         std::string json = ParseLandmarks::AddDescriptor(contents, "HANDS", frame);
+                        LOG(INFO) << json;
                         client.Send(json);
                     }
                 }
