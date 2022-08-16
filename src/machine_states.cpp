@@ -81,7 +81,7 @@ namespace BlendArMocap
         Client client = Client();
         // Create unset timestamp to keep track of the frame
         mediapipe::Timestamp first_stamp = mediapipe::Timestamp::Unset();
-
+        int64 frame = -1;
         while (this->is_detecting)
         {
             // Update the graph while running
@@ -98,7 +98,6 @@ namespace BlendArMocap
                         // sends polled face data if client connected
                         mediapipe::Packet data_packet;
                         if (!pollers[0]->Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                        int64 frame = Frame(&first_stamp, data_packet.Timestamp());
                         auto &landmarks = data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
 
                         if (client.connected) 
@@ -121,10 +120,9 @@ namespace BlendArMocap
                         // sends polled pose data if client connected
                         mediapipe::Packet data_packet;
                         if (!pollers[0]->Next(&data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
-                        int64 frame = Frame(&first_stamp, data_packet.Timestamp());
                         auto &landmarks = data_packet.Get<mediapipe::NormalizedLandmarkList>();
 
-                        if (!client.connected) 
+                        if (client.connected) 
                         {
                             std::string contents = ParseLandmarks::NormalizedLandmarkListToJson(landmarks, 33);
                             std::string json = ParseLandmarks::AddDescriptor(contents, "POSE", frame);
@@ -144,7 +142,6 @@ namespace BlendArMocap
                         mediapipe::Packet ln_data_packet;
                         if (!pollers[0]->Next(&ln_data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
                         auto &landmarks = ln_data_packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>();
-                        int64 frame = Frame(&first_stamp, ln_data_packet.Timestamp());
 
                         mediapipe::Packet hd_data_packet;
                         if (!pollers[1]->Next(&hd_data_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
@@ -187,7 +184,6 @@ namespace BlendArMocap
                         // Transmitting data.
                         std::string contents = ParseLandmarks::VectorJsonStringToJson(results);
                         std::string json = ParseLandmarks::AddDescriptor(contents, "HANDS", frame);
-                        LOG(INFO) << json;
                         client.Send(json);
                     }
                 }
@@ -197,12 +193,11 @@ namespace BlendArMocap
                 case HOLISTIC:
                 {
                     int count = 0;
-                    int64 frame = -1;
+                    // TODO: fix frame (is always -1) as the package doesnt contain a timestamp...
                     std::vector<std::string> results;
                     // polling lhand, rhand, face, pose data and sending it if avail 
                     if (pollers[0]->QueueSize() > 0 ){
                         mediapipe::Packet lhand_packet;
-                        frame = Frame(&first_stamp, lhand_packet.Timestamp());
                         if (!pollers[0]->Next(&lhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
                         auto lhand_landmarks = lhand_packet.Get<mediapipe::NormalizedLandmarkList>();
                         auto lhand_json = ParseLandmarks::NormalizedLandmarkListToJson(lhand_landmarks, 21);
@@ -213,7 +208,6 @@ namespace BlendArMocap
 
                     if (pollers[1]->QueueSize() > 0 ){
                         mediapipe::Packet rhand_packet;
-                        if (frame == -1) { frame = Frame(&first_stamp, rhand_packet.Timestamp()); }
                         if (!pollers[1]->Next(&rhand_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
                         auto rhand_landmarks = rhand_packet.Get<mediapipe::NormalizedLandmarkList>();
                         auto rhand_json = ParseLandmarks::NormalizedLandmarkListToJson(rhand_landmarks, 21);
@@ -224,7 +218,6 @@ namespace BlendArMocap
 
                     if (pollers[2]->QueueSize() > 0 ){
                         mediapipe::Packet face_packet;
-                        if (frame == -1) { frame = Frame(&first_stamp, face_packet.Timestamp()); }
                         if (!pollers[2]->Next(&face_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
                         auto face_landmarks = face_packet.Get<mediapipe::NormalizedLandmarkList>();
                         auto face_json = ParseLandmarks::NormalizedLandmarkListToJson(face_landmarks, 468);
@@ -235,7 +228,6 @@ namespace BlendArMocap
             
                     if (pollers[3]->QueueSize() > 0 ){
                         mediapipe::Packet pose_packet;
-                        if (frame == -1) { frame = Frame(&first_stamp, pose_packet.Timestamp()); }
                         if (!pollers[3]->Next(&pose_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
                         auto pose_landmarks = pose_packet.Get<mediapipe::NormalizedLandmarkList>();
                         auto pose_json = ParseLandmarks::NormalizedLandmarkListToJson(pose_landmarks, 33);
@@ -257,6 +249,10 @@ namespace BlendArMocap
             // Render frame
             mediapipe::Packet frame_packet;
             if (!frame_poller.Next(&frame_packet)) { LOG(ERROR) << absl::InternalError("Receiving poller packet failed."); break; }
+            if (BlendArMocapGUI::Callback::instance()->input_type == 0){
+                frame = Frame(&first_stamp, frame_packet.Timestamp());
+            }
+            else { frame++; }
             auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
             cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
             cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);

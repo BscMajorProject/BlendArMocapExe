@@ -9,6 +9,7 @@
 /bazel-testlogs
 /bazel-BlendArMocapExe
 
+/logs
 
 bazel-*
 mediapipe/MediaPipe.xcodeproj

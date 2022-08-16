@@ -16,16 +16,16 @@ namespace BlendArMocap
     {
         // HAND=0, FACE=1, POSE=2, HOLISTIC=3,
         if (detection_type == 0) {
-            this->config_file_path = "src/mp/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
+            this->config_file_path = "mediapipe/graphs/hand_tracking/hand_tracking_desktop_live.pbtxt";
         }
         else if (detection_type == 1) {
-            this->config_file_path = "src/mp/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
+            this->config_file_path = "mediapipe/graphs/face_mesh/face_mesh_desktop_live.pbtxt";
         }
         else if (detection_type == 2) {
-            this->config_file_path = "src/mp/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
+            this->config_file_path = "mediapipe/graphs/pose_tracking/pose_tracking_cpu.pbtxt";
         }
         else {
-            this->config_file_path = "src/mp/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
+            this->config_file_path = "mediapipe/graphs/holistic_tracking/holistic_tracking_cpu.pbtxt";
         }
         if (input_type == 1) { this->is_video = true; }
         else { this->is_video = false; }

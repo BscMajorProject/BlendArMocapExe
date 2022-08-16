@@ -107,12 +107,12 @@ namespace BlendArMocapGUI
                 
         // Set default font
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.Fonts->AddFontFromFileTTF("src/gui/resources/Roboto-Medium.ttf", 14.0f);
+        io.Fonts->AddFontFromFileTTF("resources/Roboto-Medium.ttf", 14.0f);
 
         // load image file
         int w, h;
         int channels;
-        unsigned char* pixels = stbi_load("src/gui/resources/icon.png", &w, &h, &channels, 4);
+        unsigned char* pixels = stbi_load("resources/icon.png", &w, &h, &channels, 4);
 
         // Set window icon
         GLFWimage images[1];

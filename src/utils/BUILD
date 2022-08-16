@@ -8,3 +8,10 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+
+cc_binary(
+    name="purge_logs",
+    srcs=["purge_logs.cpp"],
+    deps=["@imguifilediaglog//dirent:dirent",]
+)
