@@ -208,8 +208,11 @@ namespace BlendArMocapGUI
     }
 
     void Render(cv::Mat image, GLFWwindow* window){
-        // cv::Mat image = ResizeImage(frame);
-        // cv::Mat image = frame;
+        if (Callback::instance()->input_type == 1 && Callback::instance()->toggled_detection)
+        {
+            cv::Mat frame = ResizeImage(image);
+            cv::Mat image = frame;
+        }
         GLuint texture = BlendArMocapGUI::OnBeforeRender(image);
         BlendArMocapGUI::DrawGUI(texture, image);
         ImGui::Render();
