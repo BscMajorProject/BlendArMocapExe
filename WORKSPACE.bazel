@@ -2,23 +2,23 @@ workspace(name = "blendarmocap")
 
 local_repository(
     name = "mediapipe",
-    path="/home/denysh/Documents/development/cpp/mediapipe"
+    # path="/home/denysh/Documents/development/cpp/mediapipe",
+    path="/Users/Scylla/Documents/Projects/cpp/mediapipe",
 )
 
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 new_git_repository(
-    name = "imgui",
+    name = "imgui_linux",
     remote = "https://github.com/ocornut/imgui",
     branch="master",
-    build_file = "@//third_party:imgui.BUILD",
+    build_file = "@//third_party:imgui_linux.BUILD",
 )
 
 local_repository(
     name = "imguifilediaglog",
     path="third_party/ImGuiFileDialog-Lib_Only/",
 )
-
 
 local_repository(
     name = "dirent",
@@ -41,7 +41,7 @@ new_local_repository(
 
 new_local_repository(
     name = "opengl_linux",
-    build_file = "@//third_party:gl_linux.BUILD",
+    build_file = "@//third_party:opengl_linux.BUILD",
     path = "/usr",
 )
 

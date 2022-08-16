@@ -27,7 +27,8 @@ cc_library(
         "callbacks.h",
     ],
     deps = [
-        "@imgui//:imgui_glfw",
+        # TODO: fix inludes 
+        "//third_party:imgui",
         "@imguifilediaglog//:ImGuiFileDialog",
         "@glfw_linux//:glfw",
         "@linux_opencv//:opencv",
