@@ -1,0 +1,32 @@
+{
+    "env": {
+        "myDefaultIncludePath": [
+            "${workspaceFolder}",
+            "${workspaceFolder}/include"
+        ],
+        "myCompilerPath": "usr/bin/clang++"
+    },
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/denysh/Documents/development/cpp/mediapipe",
+                "/home/denysh/.cache/bazel/_bazel_denysh/15e758b1e88422b3c6ce79718556f03f/external/com_google_protobuf/src",
+                "/home/denysh/.cache/bazel/_bazel_denysh/dd83bd391d241b637cd6cc39941485eb/external/com_github_glog_glog/src/windows",
+                "/home/denysh/.cache/bazel/_bazel_denysh/dd83bd391d241b637cd6cc39941485eb/execroot/mediapipe/bazel-out/host/bin",
+                "/usr/include/GLFW",
+                "/usr/include/opencv4",
+                "/usr/include/GL",
+                "/usr/local/lib/stb",
+                "/usr/local/lib/imgui/",
+                "/usr/local/lib/ImGuiFileDialog-Lib_Only"
+             ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
