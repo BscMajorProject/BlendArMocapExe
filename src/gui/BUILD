@@ -1,17 +1,3 @@
-# TODO: dynamic platform specific libs
-cc_binary(
-    name = "demo",
-    srcs = ["demo.cpp"],
-    deps = [
-        "@imgui//:imgui_glfw",
-        "@glfw_linux//:glfw",
-        "@gles_linux//:gles",
-    ],
-    copts = [
-        "-I/usr/include",
-    ],
-)
-
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
@@ -27,14 +13,13 @@ cc_library(
         "callbacks.h",
     ],
     deps = [
-        # TODO: fix inludes 
-        "//third_party:imgui",
-        "@imguifilediaglog//:ImGuiFileDialog",
-        "@glfw_linux//:glfw",
-        "@linux_opencv//:opencv",
-        "@gles_linux//:gles",
-        "@opengl_linux//:gl",
+
+        "@//third_party:imgui",
+        "@//third_party:gui_deps",
+        "@//third_party:opencv",
         "@stblib//:stb_image",
+
+        "@imguifilediaglog//:ImGuiFileDialog",
         "//src:absl",
     ],
     copts = [

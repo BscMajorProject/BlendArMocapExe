@@ -11,7 +11,6 @@ cc_library(
         "dirent/*.h",
         "*.h",
     ]),
-    deps=["@imgui//:imgui_glfw"],
-
+    deps=["@imgui_linux//:imgui"],
     visibility = ["//visibility:public"],
 )
