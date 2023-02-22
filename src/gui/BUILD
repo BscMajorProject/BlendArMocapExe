@@ -3,9 +3,9 @@ cc_binary(
     name = "demo",
     srcs = ["demo.cpp"],
     deps = [
-        "@imgui//:imgui_glfw",
-        "@glfw_linux//:glfw",
-        "@gles_linux//:gles",
+        "//third_party:imgui",
+        # "@glfw_linux//:glfw",
+        # "@gles_linux//:gles",
     ],
     copts = [
         "-I/usr/include",
