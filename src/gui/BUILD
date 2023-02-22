@@ -1,3 +1,16 @@
+# TODO: dynamic platform specific libs
+cc_binary(
+    name = "demo",
+    srcs = ["demo.cpp"],
+    deps = [
+        "//third_party:imgui",
+        # "@glfw_linux//:glfw",
+        # "@gles_linux//:gles",
+    ],
+    copts = [
+        "-I/usr/include",
+    ],
+)
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
