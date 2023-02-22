@@ -20,7 +20,7 @@ exports_files(["LICENSE"])
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "opengl",
+    name = "gui_deps",
     visibility = ["//visibility:public"],
     deps = select({
         "//mediapipe:android_x86": [],
@@ -30,43 +30,9 @@ cc_library(
         "//mediapipe:android_arm64": [],
         "//mediapipe:ios": [],
 
-        "//mediapipe:macos": ["@macos_opencv//:opengl",],
-        "//mediapipe:windows": ["@windows_opencv//:opengl",],
-        "//conditions:default": ["@linux_opencv//:opengl",],
-    }),
-)
-
-cc_library(
-    name = "gles",
-    visibility = ["//visibility:public"],
-    deps = select({
-        "//mediapipe:android_x86": [],
-        "//mediapipe:android_x86_64": [],
-        "//mediapipe:android_armeabi": [],
-        "//mediapipe:android_arm": [],
-        "//mediapipe:android_arm64": [],
-        "//mediapipe:ios": [],
-
-        "//mediapipe:macos": ["@macos_gles//:gles",],
-        "//mediapipe:windows": ["@windows_gles//:gles",],
-        "//conditions:default": ["@linux_gles//:gles",],
-    }),
-)
-
-cc_library(
-    name = "glfw",
-    visibility = ["//visibility:public"],
-    deps = select({
-        "//mediapipe:android_x86": [],
-        "//mediapipe:android_x86_64": [],
-        "//mediapipe:android_armeabi": [],
-        "//mediapipe:android_arm": [],
-        "//mediapipe:android_arm64": [],
-        "//mediapipe:ios": [],
-
-        "//mediapipe:macos": ["@macos_glfw//:glfw",],
-        "//mediapipe:windows": ["@windows_glfw//:glfw",],
-        "//conditions:default": ["@linux_glfw//:glfw",],
+        "//mediapipe:macos": ["@macos_gui_deps//:gui_deps",],
+        "//mediapipe:windows": ["@windows_gui_deps//:gui_deps",],
+        "//conditions:default": ["@linux_gui_deps//:gui_deps",],
     }),
 )
 
@@ -81,9 +47,9 @@ cc_library(
         "//mediapipe:android_arm64": [],
         "//mediapipe:ios": [],
 
-        "//mediapipe:macos": ["@macos_imgui//:imgui",],
-        "//mediapipe:windows": ["@windows_imgui//:imgui",],
-        "//conditions:default": ["@linux_imgui//:imgui",],
+        "//mediapipe:macos": ["@imgui_macos//:imgui",],
+        "//mediapipe:windows": ["@imgui_windows//:imgui",],
+        "//conditions:default": ["@imgui_linux//:imgui",],
     }),
 )
 
@@ -221,12 +187,6 @@ cmake_external(
 alias(
     name = "opencv_binary",
     actual = select({
-        "//mediapipe:android_x86": "@android_opencv//:libopencv_x86",
-        "//mediapipe:android_x86_64": "@android_opencv//:libopencv_x86_64",
-        "//mediapipe:android_armeabi": "@android_opencv//:libopencv_armeabi-v7a",
-        "//mediapipe:android_arm": "@android_opencv//:libopencv_armeabi-v7a",
-        "//mediapipe:android_arm64": "@android_opencv//:libopencv_arm64-v8a",
-        "//mediapipe:ios": "@ios_opencv//:opencv",
         "//mediapipe:macos": "@macos_opencv//:opencv",
         "//mediapipe:windows": "@windows_opencv//:opencv",
         "//conditions:default": "@linux_opencv//:opencv",

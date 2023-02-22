@@ -2,8 +2,8 @@ workspace(name = "blendarmocap")
 
 local_repository(
     name = "mediapipe",
-    # path="/home/denysh/Documents/development/cpp/mediapipe",
-    path="/Users/Scylla/Documents/Projects/cpp/mediapipe",
+    path="/home/denysh/Documents/development/cpp/mediapipe",
+    # path="/Users/Scylla/Documents/Projects/cpp/mediapipe",
 )
 
 
@@ -25,27 +25,25 @@ local_repository(
     path="third_party/ImGuiFileDialog-Lib_Only/dirent",
 )
 
+new_local_repository(
+    name = "windows_gui_deps",
+    build_file = "@//third_party:gui_deps_windows.BUILD",
+    path = "/usr",
+)
+
+new_local_repository(
+    name = "macos_gui_deps",
+    build_file = "@//third_party:gui_deps_macos.BUILD",
+    path = "/usr",
+)
+
+new_local_repository(
+    name = "linux_gui_deps",
+    build_file = "@//third_party:gui_deps_linux.BUILD",
+    path = "/usr",
+)
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-new_local_repository(
-    name = "glfw_linux",
-    build_file = "@//third_party:glfw_linux.BUILD",
-    path = "/usr",
-)
-
-new_local_repository(
-    name = "gles_linux",
-    build_file = "@//third_party:gles_linux.BUILD",
-    path = "/usr",
-)
-
-new_local_repository(
-    name = "opengl_linux",
-    build_file = "@//third_party:opengl_linux.BUILD",
-    path = "/usr",
-)
-
-
 # https://bazelbuild.github.io/rules_foreign_cc/main/cmake.html
 http_archive(
    name = "rules_foreign_cc",

@@ -1,0 +1,36 @@
+// Modified to enable debugging using bazel
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Bazel Build (Debug)",
+      "type": "shell",
+      "command": "bazel build ${relativeFileDirname}:${fileBasenameNoExtension} -c dbg --define MEDIAPIPE_DISABLE_GPU=1",
+      "windows": {
+        "command": "bazel build ${relativeFileDirname}:${fileBasenameNoExtension} -c dbg --experimental_enable_runfiles --define MEDIAPIPE_DISABLE_GPU=1 "
+      },
+      "osx": {
+        "command": "bazel build ${relativeFileDirname}:${fileBasenameNoExtension} -c dbg --spawn_strategy=local --define MEDIAPIPE_DISABLE_GPU=1",
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    },
+    {
+      "label": "Bazel Build (Run)",
+      "type": "shell",
+      "command": "bazel build {relativeFileDirname}:${fileBasenameNoExtension} -c opt --define MEDIAPIPE_DISABLE_GPU=1$",
+      "windows": {
+        "command": "bazel build ${relativeFileDirname}:${fileBasenameNoExtension} -c opt --define MEDIAPIPE_DISABLE_GPU=1"
+      },
+      "osx": {
+        "command": "bazel build ${relativeFileDirname}:${fileBasenameNoExtension} -c opt --define MEDIAPIPE_DISABLE_GPU=1",
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    },
+  ]
+}
